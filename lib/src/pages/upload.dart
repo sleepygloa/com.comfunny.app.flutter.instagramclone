@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:get/get.dart';
 import 'package:photo_manager/photo_manager.dart';

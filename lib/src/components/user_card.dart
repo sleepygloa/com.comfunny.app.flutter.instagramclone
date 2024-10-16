@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 
 class UserCard extends StatelessWidget{

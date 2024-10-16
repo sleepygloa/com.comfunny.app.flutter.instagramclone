@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/app.dart';
-import 'package:flutter_clone_instagram/src/binding/init_bindings.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
 
-  // This widget is the root of your application.
+  MyApp({required this.isLoggedIn});
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // useMaterial3: true, //?
-        primarySwatch: Colors.blue, //기본 칼라
+        primarySwatch: Colors.blue,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           titleTextStyle: TextStyle(color: Colors.black),
         ),
       ),
-      initialBinding: InitBinding(),
-      home: const App(),
+      home: isLoggedIn ? const App() : LoginPage(),
     );
   }
 }
