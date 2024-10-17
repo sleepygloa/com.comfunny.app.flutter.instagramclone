@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/app.dart';
+import 'package:flutter_clone_instagram/src/pages/%08splash/splash_page.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,14 +9,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  bool isSplashedIn = prefs.getBool('isSplashedIn') ?? false;
 
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  runApp(MyApp(isSplashedIn:isSplashedIn, isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
+  final bool isSplashedIn;
+  
 
-  MyApp({required this.isLoggedIn});
+  const MyApp({super.key, required this.isSplashedIn, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,10 @@ class MyApp extends StatelessWidget {
           titleTextStyle: TextStyle(color: Colors.black),
         ),
       ),
-      home: isLoggedIn ? const App() : LoginPage(),
+      // home: SplashScreen(),
+      // home: LoginPage(),
+      // home: App(),
+      home: SplashScreen(),
     );
   }
 }

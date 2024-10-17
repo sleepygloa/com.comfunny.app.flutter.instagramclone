@@ -14,8 +14,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _verificationCodeController = TextEditingController();
 
+  //이메일 인증 관련 변수
   bool _isVerificationCodeSent = false;
   bool _isEmailVerified = false;
+
+  //Sms 인증 관련 변수
+  bool _isVerificationCodeSentSms = false;
+  bool _isSmsVerified = false;
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
@@ -24,7 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (value.length < 8) {
       return '비밀번호는 최소 8자 이상이어야 합니다';
     }
-    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$').hasMatch(value)) {
+    if (!RegExp(r'^[a-zA-Z\d]{8,}$').hasMatch(value)) {
       return '비밀번호는 영문 대문자, 영문 소문자, 숫자를 포함해야 합니다';
     }
     return null;
@@ -50,10 +55,36 @@ class _RegisterPageState extends State<RegisterPage> {
     return null;
   }
 
+  // 회원가입 버튼 클릭 시 호출되는 함수
   Future<void> _register() async {
-    if (_formKey.currentState!.validate()) {
-      // 회원가입 로직 추가
+    if (!_formKey.currentState!.validate()) return;
+    
+    Map<String, dynamic>? body = await ApiService.sendApi(
+      context, 
+      '/login/saveUser',
+      {
+        'userId': _idController.text,
+        'password': _pwController.text,
+        'email': _emailController.text,
+        'phone': _phoneController.text,
+      },);
+
+    // 응답이 null이면 에러 메시지 출력
+    if(body == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('SMS 인증에 실패했습니다. 다시 시도해주세요.')),
+      );
+      return;
     }
+
+    // 응답이 성공이면 인증 이메일 발송 메시지 출력
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('SMS 이메일이 발송되었습니다.')),
+    );
+    setState(() {
+      _isVerificationCodeSentSms = true;
+      _isSmsVerified = false;
+    });
   }
 
   // 이메일 인증 메일 발송 API 호출
@@ -104,6 +135,55 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+
+  // SMS 인증 메일 발송 API 호출
+  Future<void> _sendSmsVerification(BuildContext context, String email) async {
+    Map<String, dynamic>? body = await ApiService.sendApi(
+      context, 
+      '/sms/naver/send',
+      {},);
+
+    // 응답이 null이면 에러 메시지 출력
+    if(body == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('SMS 인증에 실패했습니다. 다시 시도해주세요.')),
+      );
+      return;
+    }
+
+    // 응답이 성공이면 인증 이메일 발송 메시지 출력
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('SMS 이메일이 발송되었습니다.')),
+    );
+    setState(() {
+      _isVerificationCodeSentSms = true;
+      _isSmsVerified = false;
+    });
+  }
+
+  // 이메일 인증 코드 확인 API 호출
+  Future<void> _verifySmsCode(BuildContext context, String email, String code) async {
+    Map<String, dynamic>? body = await ApiService.sendApi(
+      context, 
+      '/sms/naver/verify',
+      {},
+      );
+
+    final result = body?['result'];
+    if (result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('SMS 인증이 완료되었습니다.')),
+      );
+      setState(() {
+        _isEmailVerified = true;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('인증번호가 올바르지 않습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,8 +211,8 @@ class _RegisterPageState extends State<RegisterPage> {
               TextFormField(
                 controller: _pwController,
                 decoration: InputDecoration(labelText: '비밀번호'),
-                obscureText: true,
-                validator: _validatePassword,
+                // obscureText: true,
+                // validator: _validatePassword,
               ),
               // 이메일 입력 필드와 인증 버튼
               Row(
@@ -187,11 +267,57 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ],
               // 전화번호 입력 필드
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(labelText: '전화번호'),
-                validator: _validatePhoneNumber,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(labelText: '전화번호'),
+                      validator: _validatePhoneNumber,
+                      onChanged: (value) {
+                        setState(() {
+                          _isVerificationCodeSentSms = false;
+                          _isSmsVerified = false;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _isSmsVerified ? null : () async {
+                      if (_validatePhoneNumber(_phoneController.text) == null) {
+                        await _sendSmsVerification(context, _phoneController.text);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('유효한 전화번호를 입력하세요')),
+                        );
+                      }
+                    },
+                    child: Text('SMS 인증'),
+                  ),
+                ],
               ),
+              // 인증번호 입력 필드와 확인 버튼
+              if (_isVerificationCodeSentSms && !_isSmsVerified) ...[
+                // 인증번호 입력 필드
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _verificationCodeController,
+                        decoration: InputDecoration(labelText: '인증번호 입력'),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _verifySmsCode(context, _phoneController.text, _verificationCodeController.text);
+                      },
+                      child: Text('이메일 확인'),
+                    ),
+                  ],
+                ),
+              ],
               SizedBox(height: 20),
               // 회원가입 버튼
               ElevatedButton(

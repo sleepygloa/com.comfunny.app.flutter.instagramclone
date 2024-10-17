@@ -2,14 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class ApiService {
   static String serverUrl = 'http://localhost:8080';
 
+  // JWT 토큰 저장 메서드
+  static Future<void> setJwtToken(String accessToken, String refreshToken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', accessToken);
+    await prefs.setString('refreshToken', refreshToken);
+  }
+
+  // JWT 토큰 가져오기 메서드
+  static Future<String?> getAccessToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+
   static Future<Map<String, dynamic>?> sendApi(BuildContext context, String url, Map<String, Object> body) async {
+    String? accessToken = await getAccessToken();
     String combineUrl = serverUrl+url;
     final response = await http.post(
       Uri.parse(combineUrl),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+        },
       body: jsonEncode(body),
     );
 
