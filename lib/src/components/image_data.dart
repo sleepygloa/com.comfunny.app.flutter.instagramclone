@@ -41,6 +41,8 @@ static String get homeOff => 'assets/images/bottom_nav_home_off_icon.jpg';
   static String get imageSelectIcon => 'assets/images/image_select_icon.jpg';
   static String get cameraIcon => 'assets/images/camera_icon.jpg';
   static String get uploadComplete => 'assets/images/upload_complete_icon.jpg';
+  static String get menuIconProfileOff => 'assets/images/menu_icon_profile_off.png';
+  static String get menuIconProfileOn => 'assets/images/menu_icon_profile_on.png';
   static String get mypageBottomSheet01 =>
       'assets/images/mypage_bottom_sheet_01.jpg';
   static String get mypageBottomSheet02 =>
@@ -65,5 +67,7 @@ static String get homeOff => 'assets/images/bottom_nav_home_off_icon.jpg';
       'assets/images/mypage_bottom_sheet_setting_06.jpg';
   static String get mypageBottomSheetSetting07 =>
       'assets/images/mypage_bottom_sheet_setting_07.jpg';
+  static String get defaultImage =>
+      'assets/images/logo.jpg';
 
 } 

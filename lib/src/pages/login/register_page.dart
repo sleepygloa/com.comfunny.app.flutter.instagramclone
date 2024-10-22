@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
@@ -57,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // 회원가입 버튼 클릭 시 호출되는 함수
   Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
+    // if (!_formKey.currentState!.validate()) return;
     
     Map<String, dynamic>? body = await ApiService.sendApi(
       context, 
@@ -336,7 +338,7 @@ class _RegisterPageState extends State<RegisterPage> {
 class EmailVerificationScreen extends StatelessWidget {
   final String email;
 
-  EmailVerificationScreen({required this.email});
+  const EmailVerificationScreen({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {

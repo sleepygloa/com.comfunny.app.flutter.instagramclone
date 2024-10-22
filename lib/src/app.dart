@@ -37,7 +37,6 @@ class App extends GetView<BottomNavController> {
             type: BottomNavigationBarType.fixed, //아이콘의 크기가 고정된다.
             showSelectedLabels: false, //선택된 아이콘의 라벨을 보여줄지 여부
             showUnselectedLabels: false, //선택되지 않은 아이콘의 라벨을 보여줄지 여부
-            backgroundColor: Colors.white, //바텀 네비게이션바 색상
             currentIndex: controller.pageIndex.value, //선택된 아이콘의 인덱스
             elevation: 0, //바텀 네비게이션바의 그림자
             onTap: controller.changeBottomNav, //아이콘을 선택했을 때 호출되는 콜백함수
@@ -62,8 +61,9 @@ class App extends GetView<BottomNavController> {
                 label: 'active',
               ),
               BottomNavigationBarItem(
-                icon: Container(),
+                icon: ImageData(IconPath.menuIconProfileOff),
                 label: 'mypage',
+                activeIcon: ImageData(IconPath.menuIconProfileOn),
               ),
             ],
           ),

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/app.dart';
+import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/register_page.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -57,11 +62,25 @@ class _LoginPageState extends State<LoginPage> {
     // 로그인 성공 시 accessToken, refreshToken 저장
     await ApiService.setJwtToken(body['accessToken'], body['refreshToken']);
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+
+    // DataController를 GetX에 등록하고 값 업데이트
+    DataController dataController = Get.put(DataController());
+    dataController.updateUserData({
+      "postCount":10,
+      "followersCount":5,
+      "followingCount":2,
+      "thumbPath":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+      "description":"안녕하세요, 김또노 입니다."
+    });
+
     // BottomNavController를 GetX에 등록
     Get.put(BottomNavController());
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => App()), // 로그인 성공 시 App 화면으로 전환
+      MaterialPageRoute(builder: (context) => App()),
     );
   }
 

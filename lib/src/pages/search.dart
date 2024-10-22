@@ -32,7 +32,6 @@ class _SearchState extends State<Search>{
       groupBox[gi].add(size);
       groupIndex[gi] += size; //가장 작은 그룹의 인덱스에 사이즈 추가
     }
-    print(groupBox);
   }
 
   //검색바
@@ -42,7 +41,6 @@ class _SearchState extends State<Search>{
         Expanded(
           child: GestureDetector(
             onTap: (){
-              // Get.to(const SearchFocus());
               Navigator.push(context, MaterialPageRoute(builder: (context)=> const SearchFocus()));
             },
             //검색바

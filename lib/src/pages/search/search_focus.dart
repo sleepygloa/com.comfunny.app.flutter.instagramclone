@@ -9,8 +9,6 @@ class SearchFocus extends StatefulWidget{
   State<SearchFocus> createState() => _SearchFocusState();
 }
 
-
-
 class _SearchFocusState extends State<SearchFocus> with TickerProviderStateMixin{
 
   late TabController tabController;
@@ -74,7 +72,9 @@ class _SearchFocusState extends State<SearchFocus> with TickerProviderStateMixin
           // onTap: () =>{
           //   Get.find<BottomNavController>().willPopAction()
           // },
-          onTap: BottomNavController.to.willPopAction,
+          onTap: (){
+            BottomNavController.to.willPopAction();
+          },
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: ImageData(IconPath.backBtnIcon),
