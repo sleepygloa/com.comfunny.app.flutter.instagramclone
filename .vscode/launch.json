@@ -20,6 +20,7 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
-        }
+        },
+    
     ]
 }

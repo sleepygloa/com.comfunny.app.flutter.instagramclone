@@ -7,8 +7,8 @@ import 'package:flutter_clone_instagram/src/pages/mypage.dart';
 import 'package:flutter_clone_instagram/src/pages/search.dart';
 import 'package:get/get.dart';
 
-class App extends GetView<BottomNavController> {
-  const App({super.key});
+class AppInstargram extends GetView<BottomNavController> {
+  const AppInstargram({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -19,7 +19,7 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   late TabController tabController;
   final DataController dataController = Get.put(DataController());
-  bool _isLoggedIn = false;
+  final bool _isLoggedIn = false;
 
   @override
   void initState() {

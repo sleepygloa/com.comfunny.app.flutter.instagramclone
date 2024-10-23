@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
 import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:flutter_clone_instagram/src/pages/profile/app_info_page.dart';

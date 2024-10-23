@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clone_instagram/src/app.dart';
+import 'package:flutter_clone_instagram/src/%08app_instargram.dart';
 import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
 import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Get.put(BottomNavController());
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => App()),
+      MaterialPageRoute(builder: (context) => AppInstargram()),
     );
   }
 

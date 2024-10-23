@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clone_instagram/src/app.dart';
-import 'package:flutter_clone_instagram/src/components/image_data.dart';
+import 'package:flutter_clone_instagram/src/%08app_instargram.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
 import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
@@ -19,6 +18,19 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _pwController = TextEditingController();
+  
+  String? _selectedRole; // 선택된 역할을 저장할 변수
+  final List<String> _roles = [
+    '인스타그램',
+    '물류센터관리',
+    '배송기사',
+  ]; // 역할 목록
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = _roles[0]; // 기본적으로 첫 번째 항목 선택
+  }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
@@ -27,30 +39,24 @@ class _LoginPageState extends State<LoginPage> {
     if (value.length < 8) {
       return '비밀번호는 최소 8자 이상이어야 합니다';
     }
-    // if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,}$').hasMatch(value)) {
-    //   return '비밀번호는 영문 대문자, 영문 소문자, 숫자를 포함해야 합니다';
-    // }
     return null;
   }
-
 
   // 로그인 버튼 클릭 시 호출되는 함수
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // 로그인 API 호출 
+    // 로그인 API 호출
     Map<String, dynamic>? body = await ApiService.sendApi(
-      context, 
+      context,
       '/login/login',
       {
         'userId': _idController.text,
         'password': _pwController.text,
       },
     );
-
     if (body == null) return;
-
-    if(body['accessToken'] == null || body['refreshToken'] == null ){
+    if (body['accessToken'] == null || body['refreshToken'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('로그인에 실패했습니다'),
@@ -61,27 +67,36 @@ class _LoginPageState extends State<LoginPage> {
 
     // 로그인 성공 시 accessToken, refreshToken 저장
     await ApiService.setJwtToken(body['accessToken'], body['refreshToken']);
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
 
-    // DataController를 GetX에 등록하고 값 업데이트
-    DataController dataController = Get.put(DataController());
-    dataController.updateUserData({
-      "postCount":10,
-      "followersCount":5,
-      "followingCount":2,
-      "thumbPath":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-      "description":"안녕하세요, 김또노 입니다."
-    });
+    // 앱 유형 선택 확인
+    switch (_selectedRole) {
+      case '인스타그램':
+          // DataController를 GetX에 등록하고 값 업데이트
+          DataController dataController = Get.put(DataController());
+          dataController.updateUserData({
+            "postCount": 10,
+            "followersCount": 5,
+            "followingCount": 2,
+            "thumbPath": "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+            "description": "안녕하세요, 김또노 입니다."
+          });
 
-    // BottomNavController를 GetX에 등록
-    Get.put(BottomNavController());
+          // BottomNavController를 GetX에 등록
+          Get.put(BottomNavController());
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AppInstargram()),
+          );
+        break;
+      case '물류센터관리':
+        break;
+      case '배송기사':
+        break;
+    }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => App()),
-    );
+
   }
 
   @override
@@ -111,6 +126,29 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: InputDecoration(labelText: '비밀번호'),
                 obscureText: true,
                 validator: _validatePassword,
+              ),
+              SizedBox(height: 20),
+              // 드롭다운 메뉴 추가
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: '사용자 역할 선택'),
+                value: _selectedRole,
+                items: _roles.map((String role) {
+                  return DropdownMenuItem<String>(
+                    value: role,
+                    child: Text(role),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedRole = newValue;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return '역할을 선택하세요';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
