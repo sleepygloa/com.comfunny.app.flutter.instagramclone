@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
-import 'package:flutter_clone_instagram/src/pages/profile/app_info_page.dart';
-import 'package:flutter_clone_instagram/src/pages/profile/notification_settings_page.dart';
-import 'package:flutter_clone_instagram/src/pages/profile/theme_settings_page.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/profile/app_info_page.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/profile/notification_settings_page.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/profile/theme_settings_page.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +17,7 @@ class Setting extends StatefulWidget{
 
 class _SettingState extends State<Setting>{
   bool _isLoggedIn = false; //로그인 상태
-  final DataController dataController = Get.put(DataController());
+  final InstargramDataController dataController = Get.put(InstargramDataController());
 
   //초기화
   @override

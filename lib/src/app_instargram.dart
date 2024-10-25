@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
-import 'package:flutter_clone_instagram/src/pages/active_history.dart';
-import 'package:flutter_clone_instagram/src/pages/home.dart';
-import 'package:flutter_clone_instagram/src/pages/mypage.dart';
-import 'package:flutter_clone_instagram/src/pages/search.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/active_history.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/home.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypage.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/search.dart';
 import 'package:get/get.dart';
 
 class AppInstargram extends GetView<BottomNavController> {

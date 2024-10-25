@@ -1,13 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/user_card.dart';
-import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/myPage_dto.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
-import 'package:flutter_clone_instagram/src/pages/profile/setting.dart';
-import 'package:flutter_clone_instagram/src/pages/search/search_focus.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/profile/setting.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({super.key});
@@ -18,14 +20,25 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   late TabController tabController;
-  final DataController dataController = Get.put(DataController());
-  final bool _isLoggedIn = false;
+  final InstargramDataController dataController = Get.put(InstargramDataController());
+
+  var myThumbnailImg = '';
+  var postCnt = 0;
+  var followersCnt = 0;
+  var followingCnt = 0;
+  var description = '';
+
+  //내 포스트 리스트
+  var myPostList = [];
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
     dataController.checkLoginStatus();
+    // MyPage 정보 조회
+    getMyPageUserInfo(context);
+    
   }
 
   @override
@@ -34,6 +47,32 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
     dataController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
   }
 
+
+  //MyPage 의 데이터를 가져오는 메서드
+  Future<void> getMyPageUserInfo(BuildContext context) async {
+    // API 호출 시뮬레이션
+    await Future.delayed(Duration(seconds: 2));
+
+    // ApiService 호출
+    var response = await ApiService.sendApi(context, '/instargram/mypage/selectMyPage', {});
+
+    // 응답 데이터가 null이 아닌지 확인
+    if (response == null) {
+      return;
+    }
+
+    // mypage_dto.dart 데이터 형식으로 변환
+    var userData = MyPageDto.fromJson(response);
+    
+    // 가져온 데이터로 사용자 데이터 업데이트 
+    setState(() {
+      postCnt = userData.postCnt;
+      followersCnt = userData.followersCnt;
+      followingCnt = userData.followingCnt;
+      myThumbnailImg = (userData.myThumbnailImg == '' ? ImageData(IconPath.defaultImage).toString() : userData.myThumbnailImg);
+      description = userData.myDescription;
+    });
+  }
 
   //로그아웃
   _logout() async {
@@ -78,7 +117,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
             children: [
               AvatarWidget(
                 type: AvatarType.type3,
-                thumbPath: dataController.thumbPath.value,
+                thumbPath: FileImage(File(IconPath.defaultImage)).toString(),
                 size: 80,
               ),
               const SizedBox(width: 10,),
@@ -86,9 +125,9 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(child: _statisticOne('Post', dataController.postCount.value)),
-                    Expanded(child: _statisticOne('Followers', dataController.followersCount.value)),
-                    Expanded(child: _statisticOne('Following', dataController.followingCount.value)),
+                    Expanded(child: _statisticOne('Post', postCnt)),
+                    Expanded(child: _statisticOne('Followers', followersCnt)),
+                    Expanded(child: _statisticOne('Following', followingCnt)),
                   ],
                 ),
               ),
@@ -96,7 +135,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 10,),
           Text(
-            dataController.description.value,
+            description,
             style: const TextStyle(
               fontSize: 13,
               color: Colors.black,
@@ -273,16 +312,23 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
         ],
       ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            _information(),
-            _menu(),
-            _discoverPeople(),
-            _tabMenu(),
-            _tabView(),
-            // _introduce(),
-          ],
+      body: RefreshIndicator(
+        // 아래로 드래그시 재조회
+        onRefresh: () async {
+          getMyPageUserInfo(context);
+        },
+        // 
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              _information(),
+              _menu(),
+              _discoverPeople(),
+              _tabMenu(),
+              _tabView(),
+              // _introduce(),
+            ],
+          ),
         ),
       ),
     );

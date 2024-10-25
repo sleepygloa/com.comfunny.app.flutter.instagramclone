@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
 
 class SearchFocus extends StatefulWidget{
   const SearchFocus({super.key});

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/message_popup.dart';
-import 'package:flutter_clone_instagram/src/pages/upload.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/upload.dart';
 import 'package:get/get.dart';
 
 enum PageName{

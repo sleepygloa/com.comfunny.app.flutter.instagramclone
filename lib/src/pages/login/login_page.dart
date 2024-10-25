@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/%08app_instargram.dart';
+import 'package:flutter_clone_instagram/src/app_wms.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/controller/bottom_nav_controller.dart';
-import 'package:flutter_clone_instagram/src/controller/data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/register_page.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _selectedRole = _roles[0]; // 기본적으로 첫 번째 항목 선택
+    _selectedRole = _selectedRole?? _roles[0]; // 기본적으로 첫 번째 항목 선택
   }
 
   String? _validatePassword(String? value) {
@@ -69,20 +70,11 @@ class _LoginPageState extends State<LoginPage> {
     await ApiService.setJwtToken(body['accessToken'], body['refreshToken']);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
+    await prefs.setString('_selectedRole', _selectedRole?? '인스타그램');
 
     // 앱 유형 선택 확인
     switch (_selectedRole) {
       case '인스타그램':
-          // DataController를 GetX에 등록하고 값 업데이트
-          DataController dataController = Get.put(DataController());
-          dataController.updateUserData({
-            "postCount": 10,
-            "followersCount": 5,
-            "followingCount": 2,
-            "thumbPath": "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-            "description": "안녕하세요, 김또노 입니다."
-          });
-
           // BottomNavController를 GetX에 등록
           Get.put(BottomNavController());
           Navigator.pushReplacement(
@@ -91,6 +83,11 @@ class _LoginPageState extends State<LoginPage> {
           );
         break;
       case '물류센터관리':
+          // BottomNavController를 GetX에 등록
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AppWms()),
+          );
         break;
       case '배송기사':
         break;
