@@ -4,6 +4,8 @@ import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_n
 import 'package:flutter_clone_instagram/src/pages/wms/ib_exam.dart';
 import 'package:get/get.dart';
 
+import 'pages/wms/ib_putw.dart';
+
 class AppWms extends GetView<BottomNavController> {
   const AppWms({super.key});
 
@@ -55,7 +57,7 @@ class AppWms extends GetView<BottomNavController> {
                 width: (MediaQuery.of(context).size.width / 2) - 16,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=> const IbPutw())),
                   child: const Text('입고적치'),
                 ),
               ),

@@ -3,7 +3,6 @@ import 'package:flutter_clone_instagram/src/%08app_instargram.dart';
 import 'package:flutter_clone_instagram/src/app_wms.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/register_page.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';

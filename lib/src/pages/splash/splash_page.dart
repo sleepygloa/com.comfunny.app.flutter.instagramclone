@@ -39,8 +39,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // 로그인 상태일 경우 홈 화면으로 이동
     await Future.delayed(Duration(seconds: 3), () {});
 
-    String _selectedRole = await dataController.getSelectedRole();
-    switch (_selectedRole) {
+    String selectedRole = await dataController.getSelectedRole();
+    switch (selectedRole) {
       case '인스타그램':
         Get.put(BottomNavController());
         Navigator.pushReplacement(

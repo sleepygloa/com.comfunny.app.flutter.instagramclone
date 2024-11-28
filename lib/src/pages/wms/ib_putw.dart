@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/common_data_table.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/wms/ib_exam_pop.dart';
 
-class IbExam extends StatefulWidget{
-  const IbExam({super.key});
+import 'ib_putw_pop.dart';
+
+class IbPutw extends StatefulWidget{
+  const IbPutw({super.key});
 
   @override
-  State<IbExam> createState() => _IbExamState();
+  State<IbPutw> createState() => _IbPutwState();
 }
 
-class _IbExamState extends State<IbExam> {
-  final TextEditingController _ibPlanYmdController = TextEditingController();
+class _IbPutwState extends State<IbPutw> {
+  final TextEditingController _workYmdController = TextEditingController();
 
   List<Map<String, dynamic>> _data = []; //데이터
 
   @override
   void initState() {
     super.initState();
-    _ibPlanYmdController.text = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+    _workYmdController.text = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
   }
 
   @override
   void dispose() {
-    _ibPlanYmdController.dispose();
+    _workYmdController.dispose();
     super.dispose();
   }
 
   // 검색
-  Future<void> _searchIbExam() async {
-    String ibPlanYmd = _ibPlanYmdController.text.replaceAll('-', '');
-    String url = '/api/wmsapp/ib/inboundExam/selectIbExamList';
+  Future<void> _searchIbPutw() async {
+    String workYmd = _workYmdController.text.replaceAll('-', '');
+    String url = '/api/wmsapp/st/stockMove/selectStMoveList';
 
-    var result = await ApiService.sendApi(context, url, {'ibPlanYmd': ibPlanYmd});
+    var result = await ApiService.sendApi(context, url, {'refVal1': 'IB', 'workYmd': workYmd});
     setState(
       () {
         if (result != null) _data = List<Map<String, dynamic>>.from(result['data']);
@@ -50,15 +51,15 @@ class _IbExamState extends State<IbExam> {
         children: [
           TextField(
             decoration: const InputDecoration(
-              hintText: '입고예정일',
+              hintText: '작업일자',
               suffixIcon: Icon(Icons.calendar_today),
             ),
             readOnly: true,
-            controller: _ibPlanYmdController,
+            controller: _workYmdController,
             onTap: () async {
                 DateTime initialDate = DateTime.now();
-                if (_ibPlanYmdController.text.isNotEmpty) {
-                initialDate = DateTime.parse(_ibPlanYmdController.text);
+                if (_workYmdController.text.isNotEmpty) {
+                initialDate = DateTime.parse(_workYmdController.text);
                 }
 
                 DateTime? pickedDate = await showDatePicker(
@@ -70,7 +71,7 @@ class _IbExamState extends State<IbExam> {
                 );
                 if (pickedDate != null) {
                 var dateStr = '${pickedDate.year}-${pickedDate.month}-${pickedDate.day}';
-                _ibPlanYmdController.text = dateStr;
+                _workYmdController.text = dateStr;
                 }
             },
           )
@@ -90,7 +91,7 @@ class _IbExamState extends State<IbExam> {
           ElevatedButton(
             onPressed: () {
               // Handle the search action
-              _searchIbExam();
+              _searchIbPutw();
             },
             child: const Text('조회'),
           ),
@@ -104,17 +105,20 @@ class _IbExamState extends State<IbExam> {
   Widget _dataTable() {
     return CommonDataTable(
       data: _data, 
-      headerName: ['입고번호','창고','고객사','공급처','입고예정일'], 
-      rowDataValue: ['ibNo','dcNm','clientNm','supplierNm','ibPlanYmd'], 
+      headerName: ['이동번호','창고','작업일','이동구분','이동상태'], 
+      rowDataValue: ['moveNo','dcNm','workYmd','moveGbnNm','workStNm'], 
       onLongPress: (item) {
+        //재고이동상세로 이동, 팝업이 닫히면 재조회
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => IbExamPop(
+            builder: (context) => IbPutwPop(
               item: item,
             ),
           ),
-        );
+        ).then((_) {
+          _searchIbPutw();
+        });
       },
     );
   }
@@ -126,7 +130,7 @@ class _IbExamState extends State<IbExam> {
         backgroundColor: Colors.white,
         elevation: 0, //그림자 제거
         title: const Text(
-          '입고검수',
+          '입고적치',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,

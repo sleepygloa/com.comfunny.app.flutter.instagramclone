@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 
 class IbExamDetailPop extends StatefulWidget{
   final dynamic item; // You can change the type of item as needed
 
-  const IbExamDetailPop({Key? key, required this.item}) : super(key: key);
+  const IbExamDetailPop({super.key, required this.item});
 
   @override
   State<IbExamDetailPop> createState() => _IbExamDetailPopState();
@@ -133,7 +132,7 @@ class _IbExamDetailPopState extends State<IbExamDetailPop> {
   //검수완료
   Future<void> _examConfirm() async {
     
-    String url = '/wms/ib/inboundExam/saveInboundExamDetailCompl';
+    String url = '/api/wmsapp/ib/inboundExam/saveIbExamDetailCompl';
     widget.item['examBoxQty'] = widget.item['pdaExamBoxQty'];
     widget.item['examEaQty'] = widget.item['pdaExamEaQty'];
     widget.item['examTotQty'] = widget.item['pdaExamBoxQty'] * widget.item['pkqty'] + widget.item['pdaExamEaQty'];
