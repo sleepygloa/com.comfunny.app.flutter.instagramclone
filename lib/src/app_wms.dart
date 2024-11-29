@@ -4,7 +4,8 @@ import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_n
 import 'package:flutter_clone_instagram/src/pages/wms/ib_exam.dart';
 import 'package:get/get.dart';
 
-import 'pages/wms/ib_putw.dart';
+import 'pages/wms/st_move.dart';
+import 'pages/wms/st_stock_inq.dart';
 
 class AppWms extends GetView<BottomNavController> {
   const AppWms({super.key});
@@ -57,7 +58,14 @@ class AppWms extends GetView<BottomNavController> {
                 width: (MediaQuery.of(context).size.width / 2) - 16,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=> const IbPutw())),
+                  onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => StMove(refVal1: 'IB'),
+                        ),
+                      );
+                  },
                   child: const Text('입고적치'),
                 ),
               ),
@@ -65,7 +73,14 @@ class AppWms extends GetView<BottomNavController> {
                 width: (MediaQuery.of(context).size.width / 2) - 16,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => StMove(refVal1: 'OB'),
+                        ),
+                      );
+                    },
                   child: const Text('출고피킹'),
                 ),
               ),
@@ -73,7 +88,14 @@ class AppWms extends GetView<BottomNavController> {
                 width: (MediaQuery.of(context).size.width / 2) - 16,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => StMove(refVal1: 'ST'),
+                        ),
+                      );
+                    },
                   child: const Text('재고이동'),
                 ),
               ),
@@ -81,7 +103,14 @@ class AppWms extends GetView<BottomNavController> {
                 width: (MediaQuery.of(context).size.width / 2) - 16,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => StStockInq(),
+                        ),
+                      );
+                    },
                   child: const Text('재고조회'),
                 ),
               ),
