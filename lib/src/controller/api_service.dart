@@ -1,4 +1,8 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -45,10 +49,22 @@ class ApiService {
 
     // 200 OK가 아닌 경우
     if (400 <= response.statusCode && response.statusCode < 500) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('서버와의 통신에 실패했습니다.')),
-      );
-      return null;
+      if(401 == response.statusCode){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('로그인이 필요합니다.')),
+        );
+            
+        //로그아웃 후 로그인 페이지로 이동
+        // dataController.logout();
+        Get.offAll(() => LoginPage());
+        return null;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('서버와의 통신에 실패했습니다.')),
+        );
+        return null;
+      }
+
     }
 
     //repsonse.body를 Map<String, dynamic>으로 변환
@@ -71,6 +87,75 @@ class ApiService {
 
     return responseBody;
   }
+
+  // API 요청 메서드
+  static Future<Map<String, dynamic>?> sendApiFile(
+    BuildContext context, String url, Map<String, dynamic> body) async {
+
+    // JWT 토큰 가져오기
+    String? accessToken = await getAccessToken();
+    // 서버 URL과 요청 URL 결합
+    String combineUrl = serverUrl + url;
+
+    // HTTP POST 요청 만들기
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(combineUrl),
+    );
+
+    request.headers.addAll({
+      if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+    });
+
+    if(body["image"] != null){
+      // 파일 추가
+      request.files.add(
+        await http.MultipartFile.fromPath('image', body["image"]!.path),
+      );
+    }
+
+    // 데이터 추가
+    body.forEach((key, value) {
+      if (key != 'image') {
+        request.fields[key] = value.toString();
+      }
+    });
+
+    try {
+      final streamedResponse = await request.send();
+
+      
+
+      // 응답 상태 확인
+      if (400 <= streamedResponse.statusCode && streamedResponse.statusCode < 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('서버와의 통신에 실패했습니다.')),
+        );
+        return null;
+      }
+
+      // 스트림 데이터를 문자열로 변환
+      final responseBodyString = await streamedResponse.stream.bytesToString();
+
+      // 문자열 데이터를 JSON으로 파싱
+      Map<String, dynamic> responseBody = jsonDecode(responseBodyString);
+      // 메시지 처리
+      if (responseBody['msgTxt'] != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseBody['msgTxt'])),
+        );
+        return null;
+      }
+
+      return responseBody;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('오류 발생: $e')),
+      );
+      return null;
+    }
+  }
+
 
   // GET 방식 API 요청 메서드
   static Future<Map<String, dynamic>?> getApi(BuildContext context, String url) async {

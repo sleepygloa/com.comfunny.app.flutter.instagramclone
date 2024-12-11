@@ -55,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
         'password': _pwController.text,
       },
     );
+    print(body);
     if (body == null) return;
     if (body['accessToken'] == null || body['refreshToken'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(

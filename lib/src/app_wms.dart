@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:flutter_clone_instagram/src/pages/wms/ib_exam.dart';
 import 'package:get/get.dart';
 
@@ -9,6 +11,17 @@ import 'pages/wms/st_stock_inq.dart';
 
 class AppWms extends GetView<BottomNavController> {
   const AppWms({super.key});
+
+  // 검색
+  Future<void> _logout(context) async {
+    String url = '/login/logout';
+
+    var result = await ApiService.sendApi(context, url, null);
+    if (result != null) {
+      Get.to(() => LoginPage());
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +40,35 @@ class AppWms extends GetView<BottomNavController> {
         actions: [
           GestureDetector(
             onTap: (){
+                showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text('프로필'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Add your profile navigation logic here
+                    },
+                    ),
+                    ListTile(
+                    leading: Icon(Icons.logout),
+                    title: Text('로그아웃'),
+                    onTap: () {
+                      _logout(this);
+                    },
+                    ),
+                  ],
+                  );
+                },
+                );
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => LoginPage()),
+              // );
               // Navigator.push(context, MaterialPageRoute(builder: (context)=> const Setting()));
             },
             child: Padding(

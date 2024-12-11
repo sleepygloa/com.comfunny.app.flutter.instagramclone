@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_clone_instagram/src/components/image_data.dart';
 
-enum AvatarType {type1, type2, type3}
+enum AvatarType {type1, type2, type3, type4}
 
 class AvatarWidget extends StatelessWidget{
   bool? hasStory;
@@ -67,6 +70,40 @@ class AvatarWidget extends StatelessWidget{
     );
   }
 
+
+  Widget type4Widget(){
+    return Container(
+        padding: const EdgeInsets.all(2),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size!),
+          child: SizedBox(
+            width: size,
+            height: size,
+
+            child: (thumbPath == '' ? 
+            ImageData(IconPath.defaultImage) 
+            : 
+            (
+              thumbPath.startsWith('http') ?
+                CachedNetworkImage(
+                  imageUrl: thumbPath,
+                  fit: BoxFit.cover,
+                ) :
+                Image.memory(
+                  base64Decode(thumbPath),
+                  fit: BoxFit.cover,
+                )
+              )
+            ),
+          )
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     switch(type){
@@ -76,6 +113,8 @@ class AvatarWidget extends StatelessWidget{
         return type2Widget();
       case AvatarType.type3:
         return type3Widget();
+      case AvatarType.type4:
+        return type4Widget();
     }
   }
 }

@@ -7,6 +7,8 @@ import 'package:flutter_clone_instagram/src/components/user_card.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/myPage_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/profile/mypage_profile_edit.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/profile/setting.dart';
 import 'package:get/get.dart';
@@ -20,13 +22,14 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   late TabController tabController;
+  final InstargramLoginController loginController = Get.put(InstargramLoginController());
   final InstargramDataController dataController = Get.put(InstargramDataController());
 
-  var myThumbnailImg = '';
-  var postCnt = 0;
-  var followersCnt = 0;
-  var followingCnt = 0;
-  var description = '';
+  // var thumbnailPth = '';
+  // var postCnt = 0;
+  // var followersCnt = 0;
+  // var followingCnt = 0;
+  // var description = '';
 
   //내 포스트 리스트
   var myPostList = [];
@@ -34,17 +37,19 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    
     tabController = TabController(length: 2, vsync: this);
-    dataController.checkLoginStatus();
+    loginController.checkLoginStatus();
     // MyPage 정보 조회
-    getMyPageUserInfo(context);
+    // getMyPageUserInfo(context);
     
   }
-
+  //화면이 변경될 때 호출되는 메서드
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    dataController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
+    loginController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
+    getMyPageUserInfo(context); // 화면 진입 시 MyPage 정보 조회
   }
 
 
@@ -54,7 +59,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
     await Future.delayed(Duration(seconds: 2));
 
     // ApiService 호출
-    var response = await ApiService.sendApi(context, '/instargram/mypage/selectMyPage', {});
+    var response = await ApiService.sendApi(context, '/api/instargram/mypage/selectMyPage', {});
 
     // 응답 데이터가 null이 아닌지 확인
     if (response == null) {
@@ -65,18 +70,18 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
     var userData = MyPageDto.fromJson(response);
     
     // 가져온 데이터로 사용자 데이터 업데이트 
-    setState(() {
-      postCnt = userData.postCnt;
-      followersCnt = userData.followersCnt;
-      followingCnt = userData.followingCnt;
-      myThumbnailImg = (userData.myThumbnailImg == '' ? ImageData(IconPath.defaultImage).toString() : userData.myThumbnailImg);
-      description = userData.myDescription;
-    });
+    // setState(() {
+    //   // postCnt = userData.postCnt;
+    //   // followersCnt = userData.followersCnt;
+    //   // followingCnt = userData.followingCnt;
+    //   // thumbnailPth = userData.thumbnailPth;
+    //   // description = userData.description;
+    // });
   }
 
   //로그아웃
   _logout() async {
-    await dataController.logout();
+    await loginController.logout();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
@@ -115,19 +120,43 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
         children: [
           Row(
             children: [
-              AvatarWidget(
-                type: AvatarType.type3,
-                thumbPath: FileImage(File(IconPath.defaultImage)).toString(),
-                size: 80,
+              //나의 아바타
+              GestureDetector(
+                child: AvatarWidget(
+                  type: AvatarType.type4,
+                  thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"]) ? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+                  size: 80,
+                ),
+                //클릭시 아바타 확대
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Avatar'),
+                        ),
+                        body: Center(
+                          child: AvatarWidget(
+                            type: AvatarType.type4,
+                            thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+                            size: 200,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                },
               ),
               const SizedBox(width: 10,),
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(child: _statisticOne('Post', postCnt)),
-                    Expanded(child: _statisticOne('Followers', followersCnt)),
-                    Expanded(child: _statisticOne('Following', followingCnt)),
+                    Expanded(child: _statisticOne('Post', dataController.apiData["postCnt"]?? 0 )),
+                    Expanded(child: _statisticOne('Followers', dataController.apiData["follwerersCnt"]?? 0 )),
+                    Expanded(child: _statisticOne('Following', dataController.apiData["followingCnt"]?? 0 )),
                   ],
                 ),
               ),
@@ -135,7 +164,14 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 10,),
           Text(
-            description,
+            dataController.apiData["userName"]?? '',
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            dataController.apiData["description"]?? '',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.black,
@@ -153,21 +189,26 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 7),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                border: Border.all(
-                  color: const Color(0xffdedede),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> const MypageProfileEdit()));
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(
+                    color: const Color(0xffdedede),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Edit Profile',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+                child: const Text(
+                  '프로필 편집',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             )

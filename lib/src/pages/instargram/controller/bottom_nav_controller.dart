@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/message_popup.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/upload.dart';
 import 'package:get/get.dart';
 
@@ -18,12 +20,14 @@ class BottomNavController extends GetxController{
   RxInt pageIndex = 0.obs;
   GlobalKey<NavigatorState> searchPageNavigationKey = GlobalKey<NavigatorState>();
   List<int> bottomHistory = [0];
+  InstargramDataController dataController = Get.put(InstargramDataController());
 
   void changeBottomNav(int value, {bool hasGesture = true}){
     var page = PageName.values[value];
+    dataController.getBasicData(Get.context!);
     switch(page){
       case PageName.upload:
-        Get.to(()=> const Upload());
+        Get.to(()=> Upload());
         break;
       case PageName.home:
       case PageName.search:

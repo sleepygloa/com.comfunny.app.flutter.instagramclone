@@ -2,16 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/post_widget.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
-class Home extends StatelessWidget{
+class Home extends StatefulWidget{
   const Home({super.key});
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  //로그인 컨트롤러
+  final InstargramLoginController loginController = Get.find<InstargramLoginController>();
+  final InstargramDataController dataController = Get.find<InstargramDataController>();
+
+
+  @override
+  void initState() {
+    super.initState();
+    
+    loginController.checkLoginStatus();
+    // MyPage 정보 조회
+    // getMyPageUserInfo(context);
+    
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loginController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
+  }
+
+  //
   Widget _myStory(){
     return Stack(
       children: [
         AvatarWidget(
-          type: AvatarType.type2,
-          thumbPath: 'https://newsimg-hams.hankookilbo.com/2022/09/18/194f6bfb-b902-4298-9edc-3e855626a56d.jpg',
+          type: AvatarType.type4,
+          thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
           size: 70,
         ),
         Positioned(
@@ -42,7 +73,6 @@ class Home extends StatelessWidget{
   }
 
   //가로 스크롤 리스트
-  //팔로우 친구들의 스토리 리스트
   Widget _storyBoardList(){
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

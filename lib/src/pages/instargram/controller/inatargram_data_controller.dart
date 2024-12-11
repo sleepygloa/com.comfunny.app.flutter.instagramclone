@@ -1,21 +1,21 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 class InstargramDataController extends GetxController {
-  // 기본 데이터 변수
-  var basicData = ''.obs;
+  var apiData = {}.obs; // API 데이터 상태
+  var isLoading = false.obs; // 로딩 상태
 
-  // API 데이터 변수
-  var apiData = {}.obs;
-
-  // 로그인 상태 변수
-  var isLoggedIn = false.obs;
-
-
-  // 기본 데이터 업데이트 메서드
-  void updateBasicData(String newData) {
-    basicData.value = newData;
+  bool getNullCheckApiData(str){
+    print('apiData[str]: ${str} ${apiData[str]}');
+    if(str == null || str == ''){
+      return false;
+    }
+    return true;
   }
 
   // API 데이터 업데이트 메서드
@@ -23,31 +23,27 @@ class InstargramDataController extends GetxController {
     apiData.value = newData;
   }
 
-  // 로그인 상태 업데이트 메서드
-  void updateLoginStatus(bool status) {
-    isLoggedIn.value = status;
-  }
 
-  // 로그인 상태 확인 메서드
-  Future<bool> checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool status = prefs.getBool('isLoggedIn') ?? false;
-    updateLoginStatus(status);
-    return status;
-  }
-
-  // 로그인 메서드
-  Future<void> login() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true);
-    updateLoginStatus(true);
-  }
-
-  // 로그아웃 메서드
-  Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    updateLoginStatus(false);
+  //기본 정보 
+  Future<RxMap?> getBasicData(BuildContext context) async {
+    //기본 데이터
+    var result = await ApiService.sendApi(context, '/api/instargram/mypage/selectMyPage', {});
+    
+    if(result != null) {
+      //기본 데이터
+      apiData["userName"] = result["description"];
+      apiData["description"] = result["description"];
+      apiData["thumbnailPth"] = result["thumbnailPth"];
+      apiData["thumbnailName"] = result["thumbnailName"];
+      //포스트, 팔로워, 팔로잉 수
+      apiData["followerCnt"] = result["followerCnt"];
+      apiData["followingCnt"] = result["followingCnt"];
+      apiData["postCnt"] = result["postCnt"];
+      print('apiData: $apiData');
+      return apiData;
+    }
+    
+    return null;
   }
 
   // 로그인시 앱 콤보 선택 데이터 가져오기 _selectedRole

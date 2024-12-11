@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/profile/app_info_page.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/profile/notification_settings_page.dart';
@@ -17,7 +18,7 @@ class Setting extends StatefulWidget{
 
 class _SettingState extends State<Setting>{
   bool _isLoggedIn = false; //로그인 상태
-  final InstargramDataController dataController = Get.put(InstargramDataController());
+  final InstargramLoginController loginController = Get.put(InstargramLoginController());
 
   //초기화
   @override
@@ -43,7 +44,7 @@ class _SettingState extends State<Setting>{
     });
 
     //로그아웃 후 로그인 페이지로 이동
-    dataController.logout();
+    loginController.logout();
     Get.offAll(() => LoginPage());
   }
 

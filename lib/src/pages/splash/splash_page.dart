@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/%08app_instargram.dart';
 import 'package:flutter_clone_instagram/src/app_wms.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +18,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   var dataController = Get.put(InstargramDataController());
+  var loginController = Get.put(InstargramLoginController());
+  // var uploadController = Get.put(UploadController());
 
 
   @override
@@ -25,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   _navigateToHome() async {
     // 로그인 상태 확인
-    bool isLoggedIn = await dataController.checkLoginStatus();
+    bool isLoggedIn = await loginController.checkLoginStatus();
 
     // 로그인 상태가 아닐 경우 로그인 페이지로 이동
     if (!isLoggedIn) {
@@ -35,6 +40,9 @@ class _SplashScreenState extends State<SplashScreen> {
       );
       return;
     }
+
+    //기본정보 가져오기
+    dataController.getBasicData(context);
 
     // 로그인 상태일 경우 홈 화면으로 이동
     await Future.delayed(Duration(seconds: 3), () {});
