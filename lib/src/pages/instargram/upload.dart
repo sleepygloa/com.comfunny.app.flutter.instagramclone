@@ -153,8 +153,8 @@ class _UploadState extends State<Upload> {
             mainAxisSpacing: 1,
             crossAxisSpacing: 1,
           ),
-          itemCount: controller.imageList.length,
-          itemBuilder: (context, index) {
+          itemCount: controller.imageList.length, // 이미지 리스트의 길이
+          itemBuilder: (context, index) { // 이미지 위젯 생성
             return _photoWidget(controller.imageList[index], 100, builder: (data) {
               return GestureDetector(
                 onTap: () => controller.handleImageSelection(controller.imageList[index]),
@@ -221,10 +221,12 @@ class _UploadState extends State<Upload> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        // 1. 뒤로가기 버튼
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        // 2. 타이틀
         title: const Text(
           '새 게시물',
           style: TextStyle(
@@ -233,12 +235,11 @@ class _UploadState extends State<Upload> {
             fontSize: 20,
           ),
         ),
+        // 3. 액션 버튼
         actions: [
           TextButton(
             onPressed: () {
               if (controller.selectedImages.isNotEmpty) {
-                // Navigate to next step or action
-                // Get.toNamed('/uploadDetail', arguments: controller.selectedImages);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => UploadDetail()),

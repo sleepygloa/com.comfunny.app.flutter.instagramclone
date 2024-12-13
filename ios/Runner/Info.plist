@@ -46,9 +46,10 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to upload photos.</string>
+	<string>필터 적용 후 이미지를 저장하기 위해 사진 라이브러리에 접근합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need permission to save photos to your library.</string>
+	<string>필터 적용된 이미지를 저장하기 위해 사용됩니다.</string>
+
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to take photos for upload.</string>
 

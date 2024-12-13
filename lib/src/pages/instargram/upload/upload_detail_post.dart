@@ -5,6 +5,8 @@ import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_c
 import 'package:get/get.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:image/image.dart' as img;
+
 
 class UploadDetailPost extends StatefulWidget {
   final List<AssetEntity>? selectedImages; // 여러 이미지를 받을 수 있도록 변경
@@ -32,42 +34,31 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
 
   // 이미지 미리보기 위젯 (여러 이미지 지원)
   Widget _imagePreview() {
-    if (controller.selectedImages == null || controller.selectedImages!.isEmpty) {
-      return Container(
-        width: double.infinity,
+    return Obx(() {
+      return SizedBox(
         height: MediaQuery.of(context).size.width,
-        color: Colors.grey,
-        child: const Center(
-          child: Text(
-            '선택한 이미지가 없습니다.',
-            style: TextStyle(color: Colors.white),
-          ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.filteredImages!.length,
+          itemBuilder: (context, index) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              color: Colors.grey,
+              child: _photoWidget(
+                controller.filteredImages![index],
+                MediaQuery.of(context).size.width.toInt(),
+                builder: (data) {
+                  return Image.memory(
+                    data,
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
+            );
+          },
         ),
       );
-    }
-    return SizedBox(
-      height: MediaQuery.of(context).size.width,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: controller.selectedImages!.length,
-        itemBuilder: (context, index) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            color: Colors.grey,
-            child: _photoWidget(
-              controller.selectedImages![index],
-              MediaQuery.of(context).size.width.toInt(),
-              builder: (data) {
-                return Image.memory(
-                  data,
-                  fit: BoxFit.cover,
-                );
-              },
-            ),
-          );
-        },
-      ),
-    );
+    });
   }
 
   Widget _photoWidget(AssetEntity asset, int size, {required Widget Function(Uint8List) builder}) {
@@ -150,18 +141,26 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
   Future<void> _savePost() async {
     final content = _contentController.text;
 
-    // 이미지를 ByteData로 변환
-    List<Uint8List> imageDataList = [];
+    // 최대 크기 (예: 10MB = 10 * 1024 * 1024 bytes)
+    const int maxSizeInBytes = 10 * 1024 * 1024;
+
+    // 이미지를 압축하여 ByteData로 변환
+    List<Uint8List> compressedImageDataList = [];
     for (var asset in controller.selectedImages ?? []) {
       final data = await asset.originBytes; // 원본 이미지 데이터
       if (data != null) {
-        imageDataList.add(data);
+        try {
+          final compressedData = await compressImage(data, maxSizeInBytes);
+          compressedImageDataList.add(compressedData);
+        } catch (e) {
+          print("이미지 압축 실패: $e");
+        }
       }
     }
 
     // API 요청
     var result = await ApiService.sendApiFile(context, '/api/instargram/post/savePost', {
-      'images': imageDataList, // 여러 이미지 전달
+      'images': compressedImageDataList, // 압축된 이미지 전달
       'content': content,
       'taggedPeople': _taggedPeoples,
       'music': _music,
@@ -175,6 +174,26 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
     }
     print('게시물 저장 성공: $result');
   }
+
+  //이미지 압축
+  Future<Uint8List> compressImage(Uint8List data, int maxSizeInBytes) async {
+  // 이미지 디코딩
+  img.Image? originalImage = img.decodeImage(data);
+  if (originalImage == null) {
+    throw Exception("이미지를 디코딩할 수 없습니다.");
+  }
+
+  int quality = 100; // 초기 품질
+  Uint8List compressedImage = Uint8List.fromList(img.encodeJpg(originalImage, quality: quality));
+
+  // 품질을 줄여가며 용량이 maxSizeInBytes 이하가 될 때까지 반복
+  while (compressedImage.lengthInBytes > maxSizeInBytes && quality > 10) {
+    quality -= 10; // 품질을 10씩 줄임
+    compressedImage = Uint8List.fromList(img.encodeJpg(originalImage, quality: quality));
+  }
+
+  return compressedImage;
+}
 
   @override
   Widget build(BuildContext context) {

@@ -25,10 +25,10 @@ class InstargramDataController extends GetxController {
 
 
   //기본 정보 
-  Future<RxMap?> getBasicData(BuildContext context) async {
+  Future<Map?> getBasicData(BuildContext context) async {
     //기본 데이터
     var result = await ApiService.sendApi(context, '/api/instargram/mypage/selectMyPage', {});
-    
+
     if(result != null) {
       //기본 데이터
       apiData["userName"] = result["description"];

@@ -40,11 +40,11 @@ class _HomeState extends State<Home> {
   Widget _myStory(){
     return Stack(
       children: [
-        AvatarWidget(
+        Obx(()=>AvatarWidget(
           type: AvatarType.type4,
           thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
           size: 70,
-        ),
+        )),
         Positioned(
           right: 5,
           bottom: 0,

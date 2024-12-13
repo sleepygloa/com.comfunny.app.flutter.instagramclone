@@ -69,14 +69,6 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
     // mypage_dto.dart 데이터 형식으로 변환
     var userData = MyPageDto.fromJson(response);
     
-    // 가져온 데이터로 사용자 데이터 업데이트 
-    // setState(() {
-    //   // postCnt = userData.postCnt;
-    //   // followersCnt = userData.followersCnt;
-    //   // followingCnt = userData.followingCnt;
-    //   // thumbnailPth = userData.thumbnailPth;
-    //   // description = userData.description;
-    // });
   }
 
   //로그아웃
@@ -122,11 +114,11 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
             children: [
               //나의 아바타
               GestureDetector(
-                child: AvatarWidget(
+                child: Obx(()=>AvatarWidget(
                   type: AvatarType.type4,
                   thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"]) ? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
                   size: 80,
-                ),
+                )),
                 //클릭시 아바타 확대
                 onTap: () {
                   Navigator.push(
