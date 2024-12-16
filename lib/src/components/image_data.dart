@@ -45,6 +45,14 @@ static String get homeOff => 'assets/images/bottom_nav_home_off_icon.jpg';
   static String get menuIconProfileOn => 'assets/images/menu_icon_profile_on.png';
   static String get defaultImage => 'assets/images/default_image.jpg';
   static String get defaultAvatar => 'assets/images/default_avatar.jpg';
+
+
+  static String get imgAdjustmentOneBlack => 'assets/images/ins_img_adjustment_1_black.jpg';
+  static String get imgAdjustmentOneWhite => 'assets/images/ins_img_adjustment_1_white.jpg';
+  static String get imgAdjustmentTwoBlack => 'assets/images/ins_img_adjustment_2_black.jpg';
+  static String get imgAdjustmentTwoWhite => 'assets/images/ins_img_adjustment_2_white.jpg';
+  static String get imgAdjustmentThreeBlack => 'assets/images/ins_img_adjustment_3_black.jpg';
+  static String get imgAdjustmentThreeWhite => 'assets/images/ins_img_adjustment_3_white.jpg';
   // static String get mypageBottomSheet01 =>
   //     'assets/images/mypage_bottom_sheet_01.jpg';
   // static String get mypageBottomSheet02 =>

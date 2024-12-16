@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/upload/upload_detail_adjustment.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/upload/upload_detail_post.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/upload/upload_detail_photo_filter.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/upload/upload_detail_search_music.dart';
@@ -63,7 +64,7 @@ class _UploadDetailState extends State<UploadDetail> {
           },
           itemBuilder: (context, index) {
             // 이미지 위젯
-            return FutureBuilder<Uint8List?>(
+            return Obx(()=>FutureBuilder<Uint8List?>(
               future: controller.filteredImages[index].originBytes, // 원본 이미지 가져오기
               builder: (context, snapshot) {
                 // 이미지 로딩 중
@@ -74,13 +75,26 @@ class _UploadDetailState extends State<UploadDetail> {
                 if (!snapshot.hasData) {
                   return const Center(child: Text('이미지를 로드할 수 없습니다.'));
                 }
+
+                final tiltValue = controller.tiltValues[index]; // 기울기 값 가져오기
+                print('기울기 값: $tiltValue');
                 // 이미지 로드 성공
-                return Image.memory(
-                  snapshot.data!,
-                  fit: BoxFit.cover,
+                return Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001) // 원근감
+                    ..rotateX(tiltValue / 10), // X축 기준 기울기
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.cover,
+                  ),
                 );
+                // return Image.memory(
+                //   snapshot.data!,
+                //   fit: BoxFit.cover,
+                // );
               },
-            );
+            ));
           },
         ),
       );
@@ -157,13 +171,40 @@ class _UploadDetailState extends State<UploadDetail> {
               ),
               const SizedBox(width: 20),
               // 조정 버튼
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
+              GestureDetector(
+                onTap: () {
+                  if (controller.selectedImages.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('필터를 적용할 이미지를 선택해주세요.')),
+                    );
+                    return;
+                  }
+                  showModalBottomSheet(
+                    barrierColor: Colors.transparent, // 배경을 투명하게 설정
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                    ),
+                    builder: (context) => UploadDetailAdjustment(
+                      image: controller.filteredImages[controller.currentIndex.value],
+                      onAdjust: (brightness, contrast) {
+                        // controller.adjustImage(brightness, contrast);
+                      },
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(Icons.tune),
                 ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(Icons.tune),
               ),
             ],
           ),
@@ -190,7 +231,6 @@ class _UploadDetailState extends State<UploadDetail> {
                 );
                 return;
               }
-
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => UploadDetailPost(selectedImages: controller.selectedImages),

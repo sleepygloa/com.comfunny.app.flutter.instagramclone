@@ -240,6 +240,7 @@ class _UploadState extends State<Upload> {
           TextButton(
             onPressed: () {
               if (controller.selectedImages.isNotEmpty) {
+                controller.initializeAdjustmentValues(); // 조정 초기화
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => UploadDetail()),

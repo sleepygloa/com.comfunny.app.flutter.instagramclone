@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/upload_adjustment_dto.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,10 +17,19 @@ class UploadController extends GetxController {
   RxList<AssetEntity> selectedImages = <AssetEntity>[].obs; // 선택된 이미지
   RxBool isMultipleSelection = false.obs; // 멀티 선택 모드 여부
 
+  // RxList<AdjustmentModel> adjustmentValues =
+  //     RxList<AdjustmentModel>.generate(3, (_) => AdjustmentModel(tilt: 0.0));
+  RxList<AdjustmentModel> adjustmentValues =
+      RxList<AdjustmentModel>.generate(3, (_) => AdjustmentModel(tilt: 0.0));
+
+
+  RxList<double> tiltValues = <double>[].obs; // 각 이미지의 기울기 값
+
   @override
   void onInit() {
     super.onInit();
     _loadPhotos();
+
   }
 
   @override
@@ -28,6 +38,36 @@ class UploadController extends GetxController {
     _clearTemporaryFiles();
   }
 
+  // 사진의 조정 값 초기화
+  void initializeAdjustmentValues() {
+    adjustmentValues.clear();
+    for (int i = 0; i < filteredImages.length; i++) {
+      adjustmentValues.add(AdjustmentModel()); // 초기값 생성
+    }
+    // adjustmentValues.clear();
+    // for (int i = 0; i < filteredImages.length; i++) {
+    //   adjustmentValues.add(AdjustmentModel()); 
+    //   // 초기값 생성
+    // }
+
+    selectedImages.refresh();
+    filteredImages.refresh();
+  }
+
+  // // 조정 값 업데이트
+  // void updateAdjustmentValue(int index, AdjustmentModel adjustment) {
+  //   if (index >= 0 && index < adjustmentValues.length) {
+  //     adjustmentValues[index] = adjustment;
+  //     adjustmentValues.refresh();
+  //   }
+  // }
+
+  // void updateAdjustment(int tabIndex, AdjustmentModel adjustment) {
+  //   adjustmentValues[tabIndex] = adjustment;
+  //   adjustmentValues.refresh(); // UI와 동기화
+  // }
+
+  
   // 임시 파일 정리
   Future<void> _clearTemporaryFiles() async {
     try {
@@ -109,7 +149,11 @@ class UploadController extends GetxController {
       filteredImages.clear();
       selectedImages.add(asset);
       filteredImages.add(asset);
+      tiltValues.add(0.0); // 초기 기울기 값을 0으로 설정
     }
+    tiltValues.clear();
+    tiltValues.addAll(List.filled(selectedImages.length, 0.0));
+
     lastSelectImages(asset);
     selectedImages.refresh();
     filteredImages.refresh();
@@ -240,6 +284,15 @@ class UploadController extends GetxController {
     } catch (e) {
       print('Uint8List -> AssetEntity 변환 중 오류 발생: $e');
       return null;
+    }
+  }
+
+
+  // 기울기 값 업데이트
+  void updateTiltValue(int index, double value) {
+    if (index >= 0 && index < tiltValues.length) {
+      tiltValues[index] = value;
+      tiltValues.refresh();
     }
   }
 }

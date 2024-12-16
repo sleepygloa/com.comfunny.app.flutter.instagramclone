@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/component/image_util.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
 import 'package:get/get.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -139,33 +140,35 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
 
   // 게시물 저장
   Future<void> _savePost() async {
-    final content = _contentController.text;
 
     // 최대 크기 (예: 10MB = 10 * 1024 * 1024 bytes)
     const int maxSizeInBytes = 10 * 1024 * 1024;
 
     // 이미지를 압축하여 ByteData로 변환
     List<Uint8List> compressedImageDataList = [];
-    for (var asset in controller.selectedImages ?? []) {
+    for (var asset in controller.filteredImages ?? []) {
       final data = await asset.originBytes; // 원본 이미지 데이터
       if (data != null) {
         try {
           final compressedData = await compressImage(data, maxSizeInBytes);
           compressedImageDataList.add(compressedData);
+
+          // 압축된 이미지 크기를 로그로 출력
+          print('압축된 이미지 크기: ${compressedData.lengthInBytes / 1024 / 1024} MB');
+          if (compressedData.lengthInBytes > maxSizeInBytes) {
+            print("이미지 크기 초과: ${compressedData.lengthInBytes / 1024 / 1024} MB");
+            throw Exception("이미지 크기가 서버에서 허용하는 최대 크기를 초과했습니다.");
+          }
         } catch (e) {
           print("이미지 압축 실패: $e");
         }
       }
     }
+    
 
     // API 요청
     var result = await ApiService.sendApiFile(context, '/api/instargram/post/savePost', {
-      'images': compressedImageDataList, // 압축된 이미지 전달
-      'content': content,
-      'taggedPeople': _taggedPeoples,
-      'music': _music,
-      'audience': _shareTarget,
-      'location': _location,
+      'filelist': compressedImageDataList, // 압축된 이미지 전달
     });
 
     if (result == null) {
@@ -173,27 +176,48 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
       return;
     }
     print('게시물 저장 성공: $result');
+    print('게시물 저장 성공: ${result['list']}');
+    print('게시물 저장 성공: ${result['imgPth']}');
+    print('게시물 저장 성공: ${result['imgName']}');
+    final content = _contentController.text;
+    // API 요청
+    var result2 = await ApiService.sendApi(context, '/api/instargram/post/saveMetadata', {
+      // 'images': compressedImageDataList, // 압축된 이미지 전달
+      'content': content,
+      'list': result['list'],
+    });
+
+    if (result2 == null) {
+      print('게시물 저장 실패');
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('게시물 저장 성공')),
+    );
   }
 
   //이미지 압축
-  Future<Uint8List> compressImage(Uint8List data, int maxSizeInBytes) async {
-  // 이미지 디코딩
-  img.Image? originalImage = img.decodeImage(data);
-  if (originalImage == null) {
-    throw Exception("이미지를 디코딩할 수 없습니다.");
+  Future<Uint8List> compressImage(Uint8List imageData, int maxSizeInBytes) async {
+    int quality = 100; // 초기 압축 품질
+    Uint8List compressedData = imageData;
+
+    // 반복적으로 압축하여 크기를 제한 이하로 줄임
+    while (compressedData.lengthInBytes > maxSizeInBytes && quality > 0) {
+      final result = await ImageUtil.compressImageData(imageData, quality: quality);
+      if (result != null) {
+        compressedData = result;
+        print('압축 품질 $quality로 재압축, 크기: ${compressedData.lengthInBytes / 1024} KB');
+      }
+      quality -= 10; // 품질을 점진적으로 낮춤
+    }
+
+    if (compressedData.lengthInBytes > maxSizeInBytes) {
+      throw Exception('이미지를 최대 크기로 압축할 수 없습니다.');
+    }
+    return compressedData;
   }
 
-  int quality = 100; // 초기 품질
-  Uint8List compressedImage = Uint8List.fromList(img.encodeJpg(originalImage, quality: quality));
-
-  // 품질을 줄여가며 용량이 maxSizeInBytes 이하가 될 때까지 반복
-  while (compressedImage.lengthInBytes > maxSizeInBytes && quality > 10) {
-    quality -= 10; // 품질을 10씩 줄임
-    compressedImage = Uint8List.fromList(img.encodeJpg(originalImage, quality: quality));
-  }
-
-  return compressedImage;
-}
 
   @override
   Widget build(BuildContext context) {

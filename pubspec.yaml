@@ -50,6 +50,7 @@ dependencies:
   image: ^3.3.0
   just_audio: ^0.9.42
   path_provider: ^2.1.5
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:

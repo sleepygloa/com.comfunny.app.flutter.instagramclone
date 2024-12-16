@@ -1,9 +1,11 @@
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,56 +104,94 @@ class ApiService {
       'POST',
       Uri.parse(combineUrl),
     );
+    
 
     request.headers.addAll({
       if (accessToken != null) 'Authorization': 'Bearer $accessToken',
     });
 
-    if(body["image"] != null){
-      // 파일 추가
+
+    // 여러 파일 추가
+    if (body["filelist"] != null) {
+      List<Uint8List> imagePaths = body["filelist"];
+    for (int i = 0; i < imagePaths.length; i++) {
       request.files.add(
-        await http.MultipartFile.fromPath('image', body["image"]!.path),
+        http.MultipartFile.fromBytes(
+          'filelist', // 서버에서 받을 필드명 (다중 처리 시 주의)
+          imagePaths[i],
+          filename: 'image_$i.jpg', // 고유 파일 이름 설정
+          contentType: MediaType('image', 'jpeg'), // MIME 타입 설정
+        ),
       );
     }
 
-    // 데이터 추가
-    body.forEach((key, value) {
-      if (key != 'image') {
-        request.fields[key] = value.toString();
+      try {
+        final streamedResponse = await request.send();
+
+        // 응답 상태 확인
+        if (400 <= streamedResponse.statusCode && streamedResponse.statusCode < 500) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('서버와의 통신에 실패했습니다.')),
+          );
+          return null;
+        }
+
+        // 스트림 데이터를 문자열로 변환
+        final responseBodyString = await streamedResponse.stream.bytesToString();
+
+        // 문자열 데이터를 JSON으로 파싱
+        Map<String, dynamic> responseBody = jsonDecode(responseBodyString);
+        // 메시지 처리
+        if (responseBody['msgTxt'] != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseBody['msgTxt'])),
+          );
+          return null;
+        }
+
+        return responseBody;
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('오류 발생: $e')),
+        );
+        return null;
       }
+    }
+  }
+
+
+    // 파일 업로드 메서드
+  static Future<String?> uploadFile(BuildContext context, String filePath) async {
+    String? accessToken = await getAccessToken();
+    String uploadUrl = '$serverUrl/api/upload'; // 파일 업로드 엔드포인트
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(uploadUrl),
+    );
+
+    request.headers.addAll({
+      if (accessToken != null) 'Authorization': 'Bearer $accessToken',
     });
+
+    // 파일 추가
+    request.files.add(
+      await http.MultipartFile.fromPath('file', filePath),
+    );
 
     try {
       final streamedResponse = await request.send();
 
-      
-
-      // 응답 상태 확인
-      if (400 <= streamedResponse.statusCode && streamedResponse.statusCode < 500) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('서버와의 통신에 실패했습니다.')),
-        );
+      if (streamedResponse.statusCode == 200) {
+        final responseBodyString = await streamedResponse.stream.bytesToString();
+        final response = jsonDecode(responseBodyString);
+        return response['fileUrl']; // 서버에서 반환된 파일 URL
+      } else {
+        print('파일 업로드 실패: ${streamedResponse.statusCode}');
         return null;
       }
-
-      // 스트림 데이터를 문자열로 변환
-      final responseBodyString = await streamedResponse.stream.bytesToString();
-
-      // 문자열 데이터를 JSON으로 파싱
-      Map<String, dynamic> responseBody = jsonDecode(responseBodyString);
-      // 메시지 처리
-      if (responseBody['msgTxt'] != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseBody['msgTxt'])),
-        );
-        return null;
-      }
-
-      return responseBody;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류 발생: $e')),
-      );
+      print('파일 업로드 중 오류 발생: $e');
       return null;
     }
   }
