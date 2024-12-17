@@ -14,12 +14,13 @@ class AppWms extends GetView<BottomNavController> {
 
   // 검색
   Future<void> _logout(context) async {
-    String url = '/login/logout';
+    ApiService.removeJwtToken();
+    // String url = '/login/logout';
 
-    var result = await ApiService.sendApi(context, url, null);
-    if (result != null) {
+    // var result = await ApiService.sendApi(context, url, null);
+    // if (result != null) {
       Get.to(() => LoginPage());
-    }
+    // }
   }
 
 

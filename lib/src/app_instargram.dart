@@ -7,8 +7,15 @@ import 'package:flutter_clone_instagram/src/pages/instargram/mypage.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/search.dart';
 import 'package:get/get.dart';
 
-class AppInstargram extends GetView<BottomNavController> {
+class AppInstargram extends StatefulWidget {
   const AppInstargram({super.key});
+
+  @override
+  State<AppInstargram> createState() => _AppInstargramState();
+}
+
+class _AppInstargramState extends State<AppInstargram> {
+  final BottomNavController controller = Get.put(BottomNavController());
 
   @override
   Widget build(BuildContext context) {
@@ -72,4 +79,6 @@ class AppInstargram extends GetView<BottomNavController> {
       
     );
   }
+
+
 }

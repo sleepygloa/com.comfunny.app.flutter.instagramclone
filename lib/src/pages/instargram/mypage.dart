@@ -5,6 +5,7 @@ import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/user_card.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/MyPost.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/myPage_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
@@ -25,15 +26,6 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   final InstargramLoginController loginController = Get.put(InstargramLoginController());
   final InstargramDataController dataController = Get.put(InstargramDataController());
 
-  // var thumbnailPth = '';
-  // var postCnt = 0;
-  // var followersCnt = 0;
-  // var followingCnt = 0;
-  // var description = '';
-
-  //내 포스트 리스트
-  var myPostList = [];
-
   @override
   void initState() {
     super.initState();
@@ -49,26 +41,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     loginController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
-    getMyPageUserInfo(context); // 화면 진입 시 MyPage 정보 조회
-  }
-
-
-  //MyPage 의 데이터를 가져오는 메서드
-  Future<void> getMyPageUserInfo(BuildContext context) async {
-    // API 호출 시뮬레이션
-    await Future.delayed(Duration(seconds: 2));
-
-    // ApiService 호출
-    var response = await ApiService.sendApi(context, '/api/instargram/mypage/selectMyPage', {});
-
-    // 응답 데이터가 null이 아닌지 확인
-    if (response == null) {
-      return;
-    }
-
-    // mypage_dto.dart 데이터 형식으로 변환
-    var userData = MyPageDto.fromJson(response);
-    
+    dataController.getBasicData(context); // 화면 진입 시 MyPage 정보 조회
   }
 
   //로그아웃
@@ -292,7 +265,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       //위에서 사용중이면 사용 불가 처리 하기 위해 아래 사용
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: 100,
+      itemCount: dataController.getNullCheckApiData(dataController.apiData["myPostList"]) ? dataController.apiData["myPostList"].length : 0,
       //
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -301,8 +274,16 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
         crossAxisSpacing: 1,
       ),
       itemBuilder: (BuildContext context, int index) {
+        var dto = dataController.apiData["myPostList"][index];
+        print('dto:: $dto');
+        var imgPth = dto["list"][0]["imgPth"];
+        print('imgPth:: $imgPth');
         return Container(
-          color: Colors.grey
+          color: Colors.grey,
+          child: Image(
+            image: NetworkImage("http://localhost:8080/"+imgPth),
+            fit: BoxFit.cover,
+          ),
         );
       },
     );
@@ -348,7 +329,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       body: RefreshIndicator(
         // 아래로 드래그시 재조회
         onRefresh: () async {
-          getMyPageUserInfo(context);
+          dataController.getBasicData(context);
         },
         // 
         child: SingleChildScrollView(

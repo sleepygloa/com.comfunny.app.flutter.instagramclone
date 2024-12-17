@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/MyPost.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,7 +12,6 @@ class InstargramDataController extends GetxController {
   var isLoading = false.obs; // 로딩 상태
 
   bool getNullCheckApiData(str){
-    print('apiData[str]: ${str} ${apiData[str]}');
     if(str == null || str == ''){
       return false;
     }
@@ -31,7 +31,7 @@ class InstargramDataController extends GetxController {
 
     if(result != null) {
       //기본 데이터
-      apiData["userName"] = result["description"];
+      apiData["userName"] = result["userName"];
       apiData["description"] = result["description"];
       apiData["thumbnailPth"] = result["thumbnailPth"];
       apiData["thumbnailName"] = result["thumbnailName"];
@@ -39,7 +39,10 @@ class InstargramDataController extends GetxController {
       apiData["followerCnt"] = result["followerCnt"];
       apiData["followingCnt"] = result["followingCnt"];
       apiData["postCnt"] = result["postCnt"];
-      print('apiData: $apiData');
+      apiData["myPostList"] = result["myPostList"];
+      // print('apiData:: $apiData');
+      // print('apiData:: ${apiData["myPostList"]}');
+      apiData.refresh();
       return apiData;
     }
     

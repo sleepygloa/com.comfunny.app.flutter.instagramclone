@@ -1,4 +1,5 @@
 class MyPageDto{
+  
   /// A Data Transfer Object (DTO) representing the user's page information.
   ///
   /// This class is used to encapsulate the user's page data, including their
