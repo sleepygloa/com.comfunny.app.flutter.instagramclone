@@ -4,7 +4,7 @@ import 'package:flutter_clone_instagram/src/app_wms.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:get/get.dart';

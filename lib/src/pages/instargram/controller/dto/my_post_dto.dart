@@ -1,6 +1,6 @@
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/myPostImg.dart';
 
-class MyPost {
+class MyPostDto {
   // 회사 코드
   final String bizCd;
   // 사용자 ID
@@ -15,7 +15,7 @@ class MyPost {
   final List<MyPostImg> list;
 
   // 생성자
-  MyPost({
+  MyPostDto({
     required this.bizCd,
     required this.userId,
     required this.postId,
@@ -25,8 +25,8 @@ class MyPost {
   });
 
   // JSON 데이터를 DTO로 변환하는 팩토리 메서드
-  factory MyPost.fromJson(Map<String, dynamic> json) {
-    return MyPost(
+  factory MyPostDto.fromJson(Map<String, dynamic> json) {
+    return MyPostDto(
       bizCd: json['bizCd'] ?? '',
       userId: json['userId'] ?? '',
       postId: json['postId'] ?? '',

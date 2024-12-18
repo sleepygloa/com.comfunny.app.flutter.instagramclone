@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/MyPost.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,6 +30,7 @@ class InstargramDataController extends GetxController {
 
     if(result != null) {
       //기본 데이터
+      apiData["userId"] = result["userId"];
       apiData["userName"] = result["userName"];
       apiData["description"] = result["description"];
       apiData["thumbnailPth"] = result["thumbnailPth"];

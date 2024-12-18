@@ -6,7 +6,7 @@ import 'package:flutter_clone_instagram/src/components/image_data.dart';
 
 enum AvatarType {type1, type2, type3, type4}
 
-class AvatarWidget extends StatelessWidget{
+class AvatarWidget extends StatelessWidget{ 
   bool? hasStory;
   String thumbPath;
   String? nickname;

@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/user_card.dart';
-import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/MyPost.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/myPage_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller%20copy.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/profile/mypage_profile_edit.dart';
 import 'package:flutter_clone_instagram/src/pages/login/login_page.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/profile/setting.dart';
@@ -266,7 +264,6 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: dataController.getNullCheckApiData(dataController.apiData["myPostList"]) ? dataController.apiData["myPostList"].length : 0,
-      //
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 1,
@@ -275,14 +272,31 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       ),
       itemBuilder: (BuildContext context, int index) {
         var dto = dataController.apiData["myPostList"][index];
-        print('dto:: $dto');
         var imgPth = dto["list"][0]["imgPth"];
-        print('imgPth:: $imgPth');
-        return Container(
-          color: Colors.grey,
-          child: Image(
-            image: NetworkImage("http://localhost:8080/"+imgPth),
-            fit: BoxFit.cover,
+        return GestureDetector(
+          onTap: () {
+            print('onTp');
+            Navigator.push(context, MaterialPageRoute(builder: (context) => MyPost()));
+          },
+          child: Container(
+            color: Colors.grey,
+            child: Stack(
+              children: [
+                Image(
+                  image: NetworkImage("http://localhost:8080/"+imgPth),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: ImageData(
+                    IconPath.imageSelectIcon,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

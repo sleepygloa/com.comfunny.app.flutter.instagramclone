@@ -1,4 +1,5 @@
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/MyPost.dart';
+
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 
 class InstagramMyPageDto {
   // 회사 이름
@@ -23,7 +24,7 @@ class InstagramMyPageDto {
   final int postCnt;
 
   // 내 게시물 목록
-  final List<MyPost> myPostList;
+  final List<MyPostDto> myPostList;
 
   // 생성자
   InstagramMyPageDto({
@@ -51,7 +52,7 @@ class InstagramMyPageDto {
       followerCnt: json['followerCnt'] ?? 0,
       followingCnt: json['followingCnt'] ?? 0,
       postCnt: json['postCnt'] ?? 0,
-      myPostList: List<MyPost>.from(json['myPostList'] ?? []),
+      myPostList: List<MyPostDto>.from(json['myPostList'] ?? []),
     );
   }
 
