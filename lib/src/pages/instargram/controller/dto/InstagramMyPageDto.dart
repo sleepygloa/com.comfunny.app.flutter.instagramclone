@@ -24,7 +24,7 @@ class InstagramMyPageDto {
   final int postCnt;
 
   // 내 게시물 목록
-  final List<MyPostDto> myPostList;
+  final List<PostDto> myPostList;
 
   // 생성자
   InstagramMyPageDto({
@@ -52,7 +52,7 @@ class InstagramMyPageDto {
       followerCnt: json['followerCnt'] ?? 0,
       followingCnt: json['followingCnt'] ?? 0,
       postCnt: json['postCnt'] ?? 0,
-      myPostList: List<MyPostDto>.from(json['myPostList'] ?? []),
+      myPostList: List<PostDto>.from(json['myPostList'] ?? []),
     );
   }
 

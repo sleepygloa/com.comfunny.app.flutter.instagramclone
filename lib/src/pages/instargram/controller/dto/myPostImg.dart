@@ -1,4 +1,4 @@
-class MyPostImg {
+class PostImg {
   final String bizCd;          // 회사 코드
   final String postId;         // 게시물 ID
   final int postDetailSeq;     // 게시물 상세 순번
@@ -6,7 +6,7 @@ class MyPostImg {
   final String imgName;        // 이미지 이름
 
   // 생성자
-  MyPostImg({
+  PostImg({
     required this.bizCd,
     required this.postId,
     required this.postDetailSeq,
@@ -14,9 +14,15 @@ class MyPostImg {
     required this.imgName,
   });
 
+
+  // JSON 데이터를 List<Comment> 객체로 변환
+  static List<PostImg> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => PostImg.fromJson(json)).toList();
+  }
+
   // JSON 데이터를 DTO로 변환하는 팩토리 메서드
-  factory MyPostImg.fromJson(Map<String, dynamic> json) {
-    return MyPostImg(
+  factory PostImg.fromJson(Map<String, dynamic> json) {
+    return PostImg(
       bizCd: json['bizCd'] ?? '',
       postId: json['postId'] ?? '',
       postDetailSeq: json['postDetailSeq'] ?? 0,
@@ -38,6 +44,6 @@ class MyPostImg {
 
   @override
   String toString() {
-    return 'MyPostImg(bizCd: $bizCd, postId: $postId, postDetailSeq: $postDetailSeq, imgPth: $imgPth, imgName: $imgName)';
+    return 'PostImg(bizCd: $bizCd, postId: $postId, postDetailSeq: $postDetailSeq, imgPth: $imgPth, imgName: $imgName)';
   }
 }

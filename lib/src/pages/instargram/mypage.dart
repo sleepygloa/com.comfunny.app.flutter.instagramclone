@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/user_card.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post.dart';
@@ -21,18 +22,14 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
   late TabController tabController;
-  final InstargramLoginController loginController = Get.put(InstargramLoginController());
-  final InstargramDataController dataController = Get.put(InstargramDataController());
+  InstargramLoginController loginController = Get.find<InstargramLoginController>();
+  InstargramDataController dataController = Get.find<InstargramDataController>();
 
   @override
   void initState() {
     super.initState();
-    
     tabController = TabController(length: 2, vsync: this);
     loginController.checkLoginStatus();
-    // MyPage 정보 조회
-    // getMyPageUserInfo(context);
-    
   }
   //화면이 변경될 때 호출되는 메서드
   @override
@@ -258,50 +255,61 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
 
   //탭 뷰
   Widget _tabView() {
-    return GridView.builder(
-      //SingleCrossAxisExtent : 그리드뷰의 크기를 지정한 값으로 설정
-      //위에서 사용중이면 사용 불가 처리 하기 위해 아래 사용
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: dataController.getNullCheckApiData(dataController.apiData["myPostList"]) ? dataController.apiData["myPostList"].length : 0,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1,
-        mainAxisSpacing: 1,
-        crossAxisSpacing: 1,
-      ),
-      itemBuilder: (BuildContext context, int index) {
-        var dto = dataController.apiData["myPostList"][index];
-        var imgPth = dto["list"][0]["imgPth"];
-        return GestureDetector(
-          onTap: () {
-            print('onTp');
-            Navigator.push(context, MaterialPageRoute(builder: (context) => MyPost()));
-          },
-          child: Container(
-            color: Colors.grey,
-            child: Stack(
-              children: [
-                Image(
-                  image: NetworkImage("http://localhost:8080/"+imgPth),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: ImageData(
-                    IconPath.imageSelectIcon,
-                  ),
-                ),
-              ],
-            ),
+    return Obx(() {
+      if (dataController.isLoading.value) {
+        return Center(child: CircularProgressIndicator()); // 로딩 중일 때
+      }
+      if (dataController.postList.isEmpty) {
+        return Center(
+          child: Text(
+            '게시물이 없습니다.',
+            style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
         );
-      },
-    );
+      }
+      return GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: dataController.postList.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: 1,
+          mainAxisSpacing: 1,
+          crossAxisSpacing: 1,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          PostDto postDto = dataController.postList[index];
+          var imgPth = postDto.list[0].imgPth;
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => MyPost()));
+            },
+            child: Container(
+              color: Colors.grey,
+              child: Stack(
+                children: [
+                  Image(
+                    image: NetworkImage("http://localhost:8080/" + imgPth),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: ImageData(
+                      IconPath.imageSelectIcon,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {

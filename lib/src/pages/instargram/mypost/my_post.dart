@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/components/my_post_widget.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_widget.dart';
 import 'package:flutter_clone_instagram/src/components/post_widget.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
@@ -58,7 +58,7 @@ class _MyPostState extends State<MyPost> {
   Widget _postList(){
     // return Container();
     return Column(
-      children: List.generate(dataController.apiData["myPostList"].length, (index) => MyPostWidget(index: index,)).toList(),
+      children: List.generate(dataController.postList.length, (index) => MyPostWidget(post: dataController.postList[index])).toList(),
     );
   }
 
@@ -96,10 +96,16 @@ class _MyPostState extends State<MyPost> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          _postList(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // 데이터 재조회
+          await dataController.getBasicData(context);
+        },
+        child: ListView(
+          children: [
+            _postList(),
+          ],
+        ),
       ),
     );
   }

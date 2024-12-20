@@ -1,14 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 class InstargramDataController extends GetxController {
+  RxBool isLoading = false.obs;
   var apiData = {}.obs; // API 데이터 상태
-  var isLoading = false.obs; // 로딩 상태
+  List<PostDto> postList = <PostDto>[].obs; // 게시물 데이터 상태
 
   bool getNullCheckApiData(str){
     if(str == null || str == ''){
@@ -25,9 +25,9 @@ class InstargramDataController extends GetxController {
 
   //기본 정보 
   Future<Map?> getBasicData(BuildContext context) async {
+    isLoading.value = true; // 로딩 시작
     //기본 데이터
     var result = await ApiService.sendApi(context, '/api/instargram/mypage/selectMyPage', {});
-
     if(result != null) {
       //기본 데이터
       apiData["userId"] = result["userId"];
@@ -39,13 +39,17 @@ class InstargramDataController extends GetxController {
       apiData["followerCnt"] = result["followerCnt"];
       apiData["followingCnt"] = result["followingCnt"];
       apiData["postCnt"] = result["postCnt"];
-      apiData["myPostList"] = result["myPostList"];
-      // print('apiData:: $apiData');
-      // print('apiData:: ${apiData["myPostList"]}');
       apiData.refresh();
+      //게시물 리스트
+      postList.assignAll(
+        result["myPostList"].map<PostDto>((data) => PostDto.fromJson(data)).toList()
+      );
+
+      isLoading.value = false; // 로딩 완료
       return apiData;
     }
     
+    isLoading.value = false; // 로딩 완료
     return null;
   }
 
