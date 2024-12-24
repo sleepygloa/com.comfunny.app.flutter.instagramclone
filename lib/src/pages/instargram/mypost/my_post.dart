@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_widget.dart';
-import 'package:flutter_clone_instagram/src/components/post_widget.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
 import 'package:get/get.dart';
@@ -38,12 +38,12 @@ class _MyPostState extends State<MyPost> {
       children: [
         Obx(()=>AvatarWidget(
           type: AvatarType.type3,
-          thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+          thumbPath: '${ApiService.serverUrl}/${dataController.myProfile.value.thumbnailPth}',
           size: 40,
         )),
         const SizedBox(width: 10,),
         Text(
-          dataController.apiData["userName"],
+          dataController.myProfile.value.userName,
           style: TextStyle(
             fontSize: 12,
             color: Colors.black,
@@ -57,9 +57,9 @@ class _MyPostState extends State<MyPost> {
   //포스트 리스트
   Widget _postList(){
     // return Container();
-    return Column(
-      children: List.generate(dataController.postList.length, (index) => MyPostWidget(post: dataController.postList[index])).toList(),
-    );
+    return Obx(()=>Column(
+      children: List.generate(dataController.myPostList.length, (index) => MyPostWidget(post: dataController.myPostList[index], index: 2)).toList(),
+    ));
   }
 
   @override
@@ -70,7 +70,7 @@ class _MyPostState extends State<MyPost> {
         title: Column(
           children: [
             Text(
-              dataController.apiData["userName"],
+              dataController.myProfile.value.userName,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,

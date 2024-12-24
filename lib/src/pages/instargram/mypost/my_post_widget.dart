@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/%08comment_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/mypost/comment_widget.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_modify.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
@@ -12,8 +12,9 @@ import 'package:flutter_clone_instagram/src/components/image_data.dart';
 
 class MyPostWidget extends StatefulWidget {
   final PostDto post;
+  int index;
 
-  MyPostWidget({super.key, required this.post});
+  MyPostWidget({super.key, required this.post, required this.index});
 
   @override
   State<MyPostWidget> createState() => _MyPostWidgetState();
@@ -28,6 +29,8 @@ class _MyPostWidgetState extends State<MyPostWidget> {
   @override
   void initState() {
     super.initState();
+    print('MyPostWidget initState');
+    print('index ${widget.index}');
   }
 
   @override
@@ -50,7 +53,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
 
     var result = await ApiService.sendApi(context, '/api/instargram/post/savePostLike', {
       'postNo': widget.post.postNo,
-      'likeUserId': dataController.apiData['userId'],
+      'likeUserId': dataController.myProfile.value.userId,
       'likeYn': saveLikeYn,
     });
 
@@ -75,12 +78,41 @@ class _MyPostWidgetState extends State<MyPostWidget> {
         children: [
           AvatarWidget(
             type: AvatarType.type3,
-            nickname: dataController.apiData['userName'],
+            nickname: dataController.myProfile.value.userName, // 닉네임
             size: 40,
-            thumbPath: "http://localhost:8080/"+dataController.apiData['thumbnailPth'],
+            thumbPath: '${ApiService.serverUrl}/${dataController.myProfile.value.thumbnailPth}',
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              showModalBottomSheet(
+                context: Get.context!,
+                isScrollControlled: true, // 모달 시트가 화면의 대부분을 차지하도록 설정
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                builder: (BuildContext context) {
+                  return DraggableScrollableSheet(
+                    initialChildSize: 0.7, // 초기 높이를 화면의 70%로 설정
+                    minChildSize: 0.5,     // 최소 높이
+                    maxChildSize: 1.0,     // 최대 높이 (전체 화면)
+                    expand: false,         // 콘텐츠에 맞게 높이 조정 가능
+                    builder: (_, scrollController) {
+                      return SingleChildScrollView(
+                        controller: scrollController,
+                        child: MyPostModify(
+                          post: widget.post, // 게시물 번호 전달
+                          index: widget.index, // 게시물 인덱스 전달
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+
+            },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ImageData(
@@ -99,7 +131,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
     var list = widget.post.list;
     if (list.length == 1) {
       return CachedNetworkImage(
-        imageUrl: "http://localhost:8080/" + list[0].imgPth,
+        imageUrl: '${ApiService.serverUrl}/${list[0].imgPth}',
       );
     } else {
       return Stack(
@@ -115,7 +147,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
               },
               itemBuilder: (context, pageIndex) {
                 return CachedNetworkImage(
-                  imageUrl: "http://localhost:8080/"+list[pageIndex].imgPth,
+                  imageUrl: '${ApiService.serverUrl}/${list[0].imgPth}',
                   fit: BoxFit.cover,
                 );
               },
@@ -224,7 +256,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
           ),
           ExpandableText(
             widget.post.content ?? '',
-            prefixText: dataController.apiData['userName'],
+            prefixText: dataController.myProfile.value.userName,
             onPrefixTap: () => print('prefix tapped'),
             prefixStyle: const TextStyle(fontWeight: FontWeight.bold),
             expandText: '더보기',

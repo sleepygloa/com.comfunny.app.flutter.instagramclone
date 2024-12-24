@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/components/post_widget.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_widget.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class Home extends StatefulWidget{
   const Home({super.key});
@@ -23,11 +22,10 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    
     loginController.checkLoginStatus();
-    // MyPage 정보 조회
-    // getMyPageUserInfo(context);
-    
+
+    //포스트 리스트 가져오기
+    dataController.getPostList(context);
   }
 
   @override
@@ -36,13 +34,13 @@ class _HomeState extends State<Home> {
     loginController.checkLoginStatus(); // 화면 진입 시 로그인 상태 확인
   }
 
-  //
+  // 나의 스토리
   Widget _myStory(){
     return Stack(
       children: [
         Obx(()=>AvatarWidget(
           type: AvatarType.type4,
-          thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+          thumbPath: dataController.myProfile.value.thumbnailPth,
           size: 70,
         )),
         Positioned(
@@ -98,9 +96,9 @@ class _HomeState extends State<Home> {
 
   //포스트 리스트
   Widget _postList(){
-    return Column(
-      children: List.generate(50, (index) => const PostWidget()).toList(),
-    );
+    return Obx(()=>Column(
+      children: List.generate(dataController.postList.length, (index) => MyPostWidget(post: dataController.postList[index], index: 1)).toList(),
+    ));
   }
 
   @override
@@ -118,11 +116,17 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          _storyBoardList(),
-          _postList(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // 데이터 재조회
+          await dataController.getPostList(context);
+        },
+        child: ListView(
+          children: [
+            _storyBoardList(),
+            _postList(),
+          ],
+        ),
       ),
     );
   }

@@ -35,8 +35,8 @@ class _MypageProfileEditState extends State<MypageProfileEdit> with TickerProvid
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userNameController.text = dataController.apiData["userName"] ?? '';
-    _descriptionController.text = dataController.apiData["description"] ?? '';
+    _userNameController.text = dataController.myProfile.value.userName;
+    _descriptionController.text = dataController.myProfile.value.description;
   }
 
   //사진
@@ -67,26 +67,19 @@ class _MypageProfileEditState extends State<MypageProfileEdit> with TickerProvid
   }
   //프로필 이미지
   Widget _getProfileImage([double? radius]) {
+    print('dataController.myProfile.value.thumbnailPth ${dataController.myProfile.value.thumbnailPth}');
     return (
-        dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])?
+        dataController.myProfile.value.thumbnailPth != ''?
         AvatarWidget(
           type: AvatarType.type4,
-          thumbPath: "http://localhost:8080/"+dataController.apiData["thumbnailPth"],
+          thumbPath: dataController.myProfile.value.thumbnailPth,
           size: (radius != null ? radius * 2 : 80),
         )
-        : (
-          _image == null
-            ? AvatarWidget(
-                type: AvatarType.type4,
-                thumbPath: '',
-                size: (radius != null ? radius * 2 : 80),
-              )
-              :
-            CircleAvatar(
-              radius: radius ?? 40,
-              backgroundImage: FileImage(_image!),
-            )
-          )
+        : 
+        CircleAvatar(
+          radius: radius ?? 40,
+          backgroundImage: FileImage(_image!),
+        )
     );
   }
   //이미지 업로드
@@ -102,9 +95,9 @@ class _MypageProfileEditState extends State<MypageProfileEdit> with TickerProvid
       'description': description,
     });
 
-    dataController.apiData["thumbnailPth"] = _image;
-    dataController.apiData["userName"] = userName;
-    dataController.apiData["description"] = description;
+    dataController.myProfile.value.thumbnailPth = _image.toString();
+    dataController.myProfile.value.userName = userName;
+    dataController.myProfile.value.description = description;
   }
   //탭
   late TabController tabController;
@@ -126,8 +119,8 @@ class _MypageProfileEditState extends State<MypageProfileEdit> with TickerProvid
     final String userName = _userNameController.text;
     final String description = _descriptionController.text;
 
-    dataController.apiData["userName"] = userName;
-    dataController.apiData["description"] = description;
+    dataController.myProfile.value.userName = userName;
+    dataController.myProfile.value.description = description;
 
     final result = await ApiService.sendApi(context, '/api/instargram/mypage/saveMyPage', {
         'userName': userName,

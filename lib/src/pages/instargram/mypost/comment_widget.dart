@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/%08comment_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:get/get.dart';
@@ -30,18 +29,14 @@ class _CommentWidgetState extends State<CommentWidget> {
   void initState() {
     super.initState();
     postUserId = widget.post.userId;
-    userId = controller.apiData["userId"];
-    userName = controller.apiData["userName"];
-    thumbnailPth = controller.apiData["thumbnailPth"];
+    userId = controller.myProfile.value.userId;
+    userName = controller.myProfile.value.userName;
+    thumbnailPth = controller.myProfile.value.thumbnailPth;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    for (var comment in widget.comments) {
-      print('댓글 번호: ${comment.commentNo}');
-      print('대댓글 리스트: ${comment.replys}');
-    }
   } 
 
   // 댓글 저장
@@ -54,76 +49,71 @@ class _CommentWidgetState extends State<CommentWidget> {
       'replyNo': replyNo,
     });
 
-    if(result != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('댓글이 저장되었습니다.')),
-      );
-      setState(() {
-        //1. commentNo "", replyNo "" 댓글 신규등록
-        if(commentNo == '' && replyNo == '') {
-          // 댓글 저장 후 댓글 리스트에 추가
-          Comment comment = new Comment(
-            bizCd: '', 
-            postNo: widget.post.postNo,
-            commentNo: "",
-            content: commentController.text, 
-            userId: userId, 
-            userName: userName,
-            thumbnailPth: thumbnailPth
-          );
-          widget.post.comments.add(comment);
-        }
-        //2. commentNo "댓글번호", replyNo "" 댓글 수정
-        if(commentNo != '' && replyNo == '') {
-          // 댓글 저장 후 댓글 리스트에 추가
-          Comment comment = new Comment(
-            bizCd: '', 
-            postNo: widget.post.postNo,
-            commentNo: commentNo,
-            content: commentController.text, 
-            userId: userId, 
-            userName: userName,
-            thumbnailPth: thumbnailPth
-          );
-          widget.post.comments.add(comment);
-        }
-        //3. commentNo "댓글번호", replyNo "0" 대댓글 신규등록
-        if(commentNo != '' && replyNo == '0') {
-          // 대댓글 저장 후 댓글 리스트에 추가
-          Reply reply = new Reply(
-            bizCd: '', 
-            postNo: widget.post.postNo,
-            commentNo: commentNo,
-            replyNo: replyNo,
-            content: commentController.text, 
-            userId: userId, 
-            userName: userName,
-            thumbnailPth: thumbnailPth
-          );
-          //현재의 widget.post.comments 내 commentNo와 같은 commentNo를 가진 대댓글 리스트에 추가
-          widget.post.comments.where((element) => element.commentNo == commentNo).first.replys.add(reply);
-        }
-        //4. commentNo "댓글번호", replyNo "대댓글번호" 대댓글 수정
-        if(commentNo != '' && replyNo != '0') {
-          // 대댓글 저장 후 댓글 리스트에 추가
-          Reply reply = new Reply(
-            bizCd: '', 
-            postNo: widget.post.postNo,
-            commentNo: commentNo,
-            replyNo: replyNo,
-            content: commentController.text, 
-            userId: userId, 
-            userName: userName,
-            thumbnailPth: thumbnailPth
-          );
-          //현재의 widget.post.comments 내 commentNo와 같은 commentNo를 가진 대댓글 리스트 내 replyNo와 같은 replyNo를 가진 대댓글 수정
-          widget.post.comments.where((element) => element.commentNo == commentNo).first.replys.where((element) => element.replyNo == replyNo).first.content = commentController.text;
-        }
+    if(result == null) return;
+      
+    print('saveComment result: $result');
+    print('====== '+ result!["commentNo"]);
+    print('====== '+ result!["replyNo"]);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('댓글이 저장되었습니다.')),
+    );
+    setState(() {
+      //1. commentNo "", replyNo "" 댓글 신규등록, commentNo 는 resultNo["commentNo"]
+      //2. commentNo "댓글번호", replyNo "" 댓글 수정
+      if(commentNo == '' && result["commentNo"] != '') {
+        print(123);
+        commentNo = result["commentNo"];
+      }
+      if(commentNo != '' && replyNo == '') {
+        // 댓글 저장 후 댓글 리스트에 추가
+        Comment comment = new Comment(
+          bizCd: '', 
+          postNo: widget.post.postNo,
+          commentNo: commentNo,
+          content: commentController.text, 
+          userId: userId, 
+          userName: userName,
+          thumbnailPth: thumbnailPth
+        );
+        widget.post.comments.add(comment);
+      }else
+      //3. commentNo "댓글번호", replyNo "0" 대댓글 신규등록
+      if(commentNo != '' && replyNo == '0') {
+        // 대댓글 저장 후 댓글 리스트에 추가
+        Reply reply = new Reply(
+          bizCd: '', 
+          postNo: widget.post.postNo,
+          commentNo: commentNo,
+          replyNo: replyNo,
+          content: commentController.text, 
+          userId: userId, 
+          userName: userName,
+          thumbnailPth: thumbnailPth
+        );
+        //현재의 widget.post.comments 내 commentNo와 같은 commentNo를 가진 대댓글 리스트에 추가
+        widget.post.comments.where((element) => element.commentNo == commentNo).first.replys.add(reply);
+      }else
+      //4. commentNo "댓글번호", replyNo "대댓글번호" 대댓글 수정
+      if(commentNo != '' && replyNo != '0') {
+        // 대댓글 저장 후 댓글 리스트에 추가
+        Reply reply = new Reply(
+          bizCd: '', 
+          postNo: widget.post.postNo,
+          commentNo: commentNo,
+          replyNo: replyNo,
+          content: commentController.text, 
+          userId: userId, 
+          userName: userName,
+          thumbnailPth: thumbnailPth
+        );
+        //현재의 widget.post.comments 내 commentNo와 같은 commentNo를 가진 대댓글 리스트 내 replyNo와 같은 replyNo를 가진 대댓글 수정
+        widget.post.comments.where((element) => element.commentNo == commentNo).first.replys.where((element) => element.replyNo == replyNo).first.content = commentController.text;
+      }
 
 
-        commentController.text = '';
-      });
-    }
+      commentController.text = '';
+    });
   }
 
 
@@ -138,7 +128,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     var result = await ApiService.sendApi(context, '/api/instargram/post/savePostLike', {
       'postNo': post.postNo,
       'commentNo': comment.commentNo,
-      'likeUserId': controller.apiData['userId'],
+      'likeUserId': controller.myProfile.value.userId,
       'likeYn': saveLikeYn,
     });
 
@@ -167,7 +157,7 @@ class _CommentWidgetState extends State<CommentWidget> {
       'postNo': widget.post.postNo,
       'commentNo': reply.commentNo,
       'replyNo': reply.replyNo,
-      'likeUserId': controller.apiData['userId'],
+      'likeUserId': controller.myProfile.value.userId,
       'likeYn': saveLikeYn,
     });
 
@@ -222,7 +212,7 @@ Widget build(BuildContext context) {
                           CircleAvatar(
                             radius: 15,
                             backgroundImage: NetworkImage(
-                              'http://localhost:8080/' + thumbnailPth,
+                              '${ApiService.serverUrl}/${controller.myProfile.value.thumbnailPth}',
                             ),
                           ),
                           SizedBox(width: 10),
@@ -287,7 +277,7 @@ Widget build(BuildContext context) {
                                     CircleAvatar(
                                       radius: 15,
                                       backgroundImage: NetworkImage(
-                                        'http://localhost:8080/' + thumbnailPth,
+                                        '${ApiService.serverUrl}/${controller.myProfile.value.thumbnailPth}',
                                       ),
                                     ),
                                     SizedBox(width: 10),
@@ -355,7 +345,7 @@ Widget build(BuildContext context) {
             CircleAvatar(
               radius: 15,
               backgroundImage: NetworkImage(
-                'http://localhost:8080/' + thumbnailPth,
+                '${ApiService.serverUrl}/${controller.myProfile.value.thumbnailPth}',
               ),
             ),
             SizedBox(width: 10),

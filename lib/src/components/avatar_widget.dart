@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 
 enum AvatarType {type1, type2, type3, type4}
 
@@ -36,6 +37,7 @@ class AvatarWidget extends StatelessWidget{
 
 
   Widget type2Widget(){
+    // print('type2Widget thumbPath: $thumbPath');
     return Container(
         padding: const EdgeInsets.all(2),
         decoration: const BoxDecoration(
@@ -72,6 +74,7 @@ class AvatarWidget extends StatelessWidget{
 
 
   Widget type4Widget(){
+    // print('type4Widget thumbPath: $thumbPath');
     return Container(
         padding: const EdgeInsets.all(2),
         decoration: const BoxDecoration(
@@ -83,21 +86,13 @@ class AvatarWidget extends StatelessWidget{
           child: SizedBox(
             width: size,
             height: size,
-
             child: (thumbPath == '' ? 
-            ImageData(IconPath.defaultImage) 
-            : 
-            (
-              thumbPath.startsWith('http') ?
-                CachedNetworkImage(
-                  imageUrl: thumbPath,
-                  fit: BoxFit.cover,
-                ) :
-                Image.memory(
-                  base64Decode(thumbPath),
-                  fit: BoxFit.cover,
-                )
-              )
+              ImageData(IconPath.defaultImage) 
+              : 
+              CachedNetworkImage(
+                imageUrl: '${ApiService.serverUrl}/$thumbPath',
+                fit: BoxFit.cover,
+              ) 
             ),
           )
         ),

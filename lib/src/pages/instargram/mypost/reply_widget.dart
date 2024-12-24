@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/%08comment_dto.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 
 class ReplyWidget extends StatelessWidget {
   final List<Reply> replies;
@@ -13,7 +14,7 @@ class ReplyWidget extends StatelessWidget {
       children: replies.map((reply) {
         return ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(reply.thumbnailPth),
+            backgroundImage: NetworkImage('${ApiService.serverUrl}/${reply.thumbnailPth}'),
           ),
           title: Text(reply.userName),
           subtitle: Column(

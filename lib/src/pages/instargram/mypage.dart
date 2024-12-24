@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
 import 'package:flutter_clone_instagram/src/components/user_card.dart';
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
@@ -84,7 +85,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
               GestureDetector(
                 child: Obx(()=>AvatarWidget(
                   type: AvatarType.type4,
-                  thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"]) ? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+                  thumbPath: dataController.myProfile.value.thumbnailPth,
                   size: 80,
                 )),
                 //클릭시 아바타 확대
@@ -99,7 +100,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
                         body: Center(
                           child: AvatarWidget(
                             type: AvatarType.type4,
-                            thumbPath: dataController.getNullCheckApiData(dataController.apiData["thumbnailPth"])? "http://localhost:8080/"+dataController.apiData["thumbnailPth"] : '',
+                            thumbPath: dataController.myProfile.value.thumbnailPth,
                             size: 200,
                           ),
                         ),
@@ -114,9 +115,9 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(child: _statisticOne('Post', dataController.apiData["postCnt"]?? 0 )),
-                    Expanded(child: _statisticOne('Followers', dataController.apiData["follwerersCnt"]?? 0 )),
-                    Expanded(child: _statisticOne('Following', dataController.apiData["followingCnt"]?? 0 )),
+                    Expanded(child: _statisticOne('Post', dataController.myProfile.value.postCnt )),
+                    Expanded(child: _statisticOne('Followers', dataController.myProfile.value.followerCnt )),
+                    Expanded(child: _statisticOne('Following', dataController.myProfile.value.followingCnt )),
                   ],
                 ),
               ),
@@ -124,14 +125,14 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 10,),
           Text(
-            dataController.apiData["userName"]?? '',
+            dataController.myProfile.value.userName,
             style: const TextStyle(
               fontSize: 13,
               color: Colors.black,
             ),
           ),
           Text(
-            dataController.apiData["description"]?? '',
+            dataController.myProfile.value.description,
             style: const TextStyle(
               fontSize: 13,
               color: Colors.black,
@@ -259,7 +260,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       if (dataController.isLoading.value) {
         return Center(child: CircularProgressIndicator()); // 로딩 중일 때
       }
-      if (dataController.postList.isEmpty) {
+      if (dataController.myPostList.isEmpty) {
         return Center(
           child: Text(
             '게시물이 없습니다.',
@@ -270,7 +271,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
       return GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: dataController.postList.length,
+        itemCount: dataController.myPostList.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           childAspectRatio: 1,
@@ -278,7 +279,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
           crossAxisSpacing: 1,
         ),
         itemBuilder: (BuildContext context, int index) {
-          PostDto postDto = dataController.postList[index];
+          PostDto postDto = dataController.myPostList[index];
           var imgPth = postDto.list[0].imgPth;
           return GestureDetector(
             onTap: () {
@@ -289,7 +290,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
               child: Stack(
                 children: [
                   Image(
-                    image: NetworkImage("http://localhost:8080/" + imgPth),
+                    image: NetworkImage('${ApiService.serverUrl}/${imgPth}'),
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
