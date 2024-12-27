@@ -32,13 +32,15 @@ class MyProfile {
 
   // JSON 데이터를 DTO로 변환하는 팩토리 메서드
   factory MyProfile.fromJson(Map<String, dynamic> json) {
+    print(json);
+    print(json['thumbnailName']);
     return MyProfile(
       bizCd: json['bizCd'] ?? '',
       userId: json['userId'] ?? '',
       userName: json['userName'] ?? '',
       description: json['description'] ?? '',
-      thumbnailPth: json['thumbnailPth'],
-      thumbnailName: json['thumbnailName'],
+      thumbnailPth:  json['thumbnailPth']??'',
+      thumbnailName: json['thumbnailName'] ?? '',
       displayYn: json['displayYn'] ?? 'Y',
       followerCnt: json['followerCnt'] ?? 0,
       followingCnt: json['followingCnt'] ?? 0,

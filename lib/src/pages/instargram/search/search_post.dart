@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-import 'package:flutter_clone_instagram/src/controller/api_service.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_widget.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/dto/my_post_dto.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_login_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/mypost/my_post_widget.dart';
 import 'package:get/get.dart';
 
-class MyPost extends StatefulWidget{
-  const MyPost({super.key});
+class SearchPost extends StatefulWidget{
+  final PostDto postDto;
+  const SearchPost({super.key, required this.postDto});
 
   @override
-  State<MyPost> createState() => _MyPostState();
+  State<SearchPost> createState() => _SearchPostState();
 }
 
-class _MyPostState extends State<MyPost> {
+class _SearchPostState extends State<SearchPost> {
   int currentPage = 0; // 현재 페이지를 추적하기 위한 변수
   //로그인 컨트롤러
   final InstargramLoginController loginController = Get.find<InstargramLoginController>();
@@ -36,7 +36,7 @@ class _MyPostState extends State<MyPost> {
   Widget _postList(){
     // return Container();
     return Obx(()=>Column(
-      children: List.generate(dataController.myPostList.length, (index) => MyPostWidget(post: dataController.myPostList[index], index: 2)).toList(),
+      children: List.generate(dataController.searchPostList.length, (index) => MyPostWidget(post: dataController.searchPostList[index], index: 1)).toList(),
     ));
   }
  
@@ -77,7 +77,7 @@ class _MyPostState extends State<MyPost> {
       body: RefreshIndicator(
         onRefresh: () async {
           // 데이터 재조회
-          await dataController.getBasicData(context);
+          await dataController.getSearchPostList(context, '');
         },
         child: ListView(
           children: [

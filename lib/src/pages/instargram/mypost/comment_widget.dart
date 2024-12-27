@@ -50,10 +50,6 @@ class _CommentWidgetState extends State<CommentWidget> {
     });
 
     if(result == null) return;
-      
-    print('saveComment result: $result');
-    print('====== '+ result!["commentNo"]);
-    print('====== '+ result!["replyNo"]);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('댓글이 저장되었습니다.')),

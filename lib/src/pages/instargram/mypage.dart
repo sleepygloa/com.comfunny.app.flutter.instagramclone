@@ -111,7 +111,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
                 },
               ),
               const SizedBox(width: 10,),
-              Expanded(
+              Obx(()=>Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -120,7 +120,7 @@ class _MyPageState extends State<MyPage> with TickerProviderStateMixin {
                     Expanded(child: _statisticOne('Following', dataController.myProfile.value.followingCnt )),
                   ],
                 ),
-              ),
+              ))
             ],
           ),
           const SizedBox(height: 10,),

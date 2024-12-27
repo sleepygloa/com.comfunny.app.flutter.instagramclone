@@ -10,8 +10,10 @@ class InstargramDataController extends GetxController {
   RxBool isLoading = false.obs;
   // var apiData = {}.obs; // API 데이터 상태
   Rx<MyProfile> myProfile = MyProfile().obs; // 내 프로필 데이터 상태
-  List<PostDto> myPostList = <PostDto>[].obs; // 내 포스트 데이터 상태
-  List<PostDto> postList = <PostDto>[].obs; // 게시물 데이터 상태
+  RxList<MyProfile> followUserList = <MyProfile>[].obs; // 내 팔로우유저 데이터 상태
+  RxList<PostDto> myPostList = <PostDto>[].obs; // 내 포스트 데이터 상태
+  RxList<PostDto> postList = <PostDto>[].obs; // 게시물 데이터 상태
+  RxList<PostDto> searchPostList = <PostDto>[].obs; // 검색 게시물 데이터 상태
 
   bool getNullCheckApiData(str){
     if(str == null || str == ''){
@@ -48,11 +50,55 @@ class InstargramDataController extends GetxController {
       postList.assignAll(
         result["myPostList"].map<PostDto>((data) => PostDto.fromJson(data)).toList()
       );
+      //게시물 리스트
+      followUserList.assignAll(
+        result["followUserList"].map<MyProfile>((data) => MyProfile.fromJson(data)).toList()
+      );
+      postList.refresh(); // 리스트 갱신
+      followUserList.refresh(); // 리스트 갱신
     }
 
-    // print('getPostList result : $result');
     isLoading.value = false; // 로딩 완료
   }
+
+
+  //포스트정보
+  // Future<void> getFollowUserList(BuildContext context) async {
+  //   isLoading.value = true; // 로딩 시작
+  //   //기본 데이터
+  //   var result = await ApiService.sendApi(context, '/api/instargram/mypage/selectFollowUserList', {});
+  //   if(result != null) {
+  //     //게시물 리스트
+  //     followUserList.assignAll(
+  //       result["followUserList"].map<PostDto>((data) => PostDto.fromJson(data)).toList()
+  //     );
+  //     followUserList.refresh(); // 리스트 갱신
+  //   }
+
+  //   isLoading.value = false; // 로딩 완료
+  // }
+
+  //검색 게시물
+  Future<void> getSearchPostList(BuildContext context, String searchWord) async {
+    isLoading.value = true; // 로딩 시작
+    //기본 데이터
+    var result = await ApiService.sendApi(context, '/api/instargram/post/selectPostOfSearch', {
+      'search': searchWord
+    });
+    // print('getSearchPostList result : $result');
+    if(result != null) {
+      //게시물 리스트
+      searchPostList.assignAll(
+        result["searchs"].map<PostDto>((data) => PostDto.fromJson(data)).toList()
+      );
+      print('getSearchPostList ' + searchPostList.length.toString());
+      searchPostList.refresh(); // 리스트 갱신
+    }
+
+    // print('getSearchPostList result : $result');
+    isLoading.value = false; // 로딩 완료
+  }
+
 
   // 로그인시 앱 콤보 선택 데이터 가져오기 _selectedRole
   Future<String> getSelectedRole() async {
@@ -99,7 +145,6 @@ class InstargramDataController extends GetxController {
     isLoading.value = true; // 로딩 시작
     //기본 데이터
     String likeDisplayYn = post.likeDisplayYn == "Y" ? "N" : "Y";
-    print('post.postNo : ${post.likeDisplayYn}');
     var result = await ApiService.sendApi(context, '/api/instargram/post/saveLikeDisplayYn', {
       'postNo': post.postNo,
       'likeDisplayYn': likeDisplayYn
@@ -137,6 +182,27 @@ class InstargramDataController extends GetxController {
     }
     isLoading.value = false; // 로딩 완료
   }
+    //게시글 고정표시여부 API 호출
+  Future<void> saveFollow(BuildContext context, PostDto post) async {
+    isLoading.value = true; // 로딩 시작
+    //기본 데이터
+    String followYn = post.followYn == "Y" ? "N" : "Y";
+    print('followYn : $followYn');
+    var result = await ApiService.sendApi(context, '/api/instargram/post/saveFollow', {
+      'userId': post.userId,
+      'followYn': followYn
+    });
+    if(result != null) {
+      searchPostList.forEach((element) {
+        if(element.userId == post.userId){
+          element.followYn = followYn;
+        }
+      });
+      searchPostList.refresh();
+    }
+    isLoading.value = false; // 로딩 완료
+  }
+
 
   //게시글 고정표시여부 API 호출
   Future<void> deletePost(BuildContext context, PostDto post) async {

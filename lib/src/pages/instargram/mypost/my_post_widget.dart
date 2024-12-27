@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/avatar_widget.dart';
 import 'package:flutter_clone_instagram/src/components/image_data.dart';
-
 class MyPostWidget extends StatefulWidget {
   final PostDto post;
   int index;
@@ -23,54 +22,72 @@ class MyPostWidget extends StatefulWidget {
 class _MyPostWidgetState extends State<MyPostWidget> {
   int currentPage = 0; // 현재 페이지를 추적하기 위한 변수
   InstargramDataController dataController = Get.find<InstargramDataController>();
-  List<Comment> comments= [];
-
+  late Rx<PostDto> post; // 상태 관리를 위한 Rx<PostDto>
 
   @override
   void initState() {
     super.initState();
-    print('MyPostWidget initState');
-    print('index ${widget.index}');
+    post = widget.post.obs; // Rx 상태로 초기화
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
 
-  @override
-  void didUpdateWidget(covariant MyPostWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    comments = widget.post.comments;
-  }
+  // @override
+  // void didUpdateWidget(covariant MyPostWidget oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   comments = widget.post.comments;
+  // }
 
   
-  //좋아요/좋아요해제 
-  Future<void> savePostLike(BuildContext context) async {
-    var likeYn = widget.post.likeYn;
-    var saveLikeYn = likeYn == 'Y' ? 'N' : 'Y'; // 좋아요 토글
-    var likeChange = likeYn == 'Y' ? -1 : 1; // 좋아요 개수 변경값
+  // 좋아요/좋아요 해제
+  Future<void> toggleLike(BuildContext context) async {
+    final likeYn = post.value.likeYn;
+    final updatedLikeYn = likeYn == 'Y' ? 'N' : 'Y';
+    final likeChange = likeYn == 'Y' ? -1 : 1;
 
-    var result = await ApiService.sendApi(context, '/api/instargram/post/savePostLike', {
-      'postNo': widget.post.postNo,
+    final result = await ApiService.sendApi(context, '/api/instargram/post/savePostLike', {
+      'postNo': post.value.postNo,
       'likeUserId': dataController.myProfile.value.userId,
-      'likeYn': saveLikeYn,
+      'likeYn': updatedLikeYn,
     });
 
-    if(result != null) {
-      setState(() {
-        // 좋아요 상태 및 좋아요 개수 업데이트
-        widget.post.likeYn = saveLikeYn;
-        widget.post.likeCnt = (widget.post.likeCnt ?? 0) + likeChange;
+    if (result != null) {
+      post.update((p) {
+        if (p != null) {
+          p.likeYn = updatedLikeYn;
+          p.likeCnt = (p.likeCnt ?? 0) + likeChange;
+        }
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('좋아요 상태 변경 실패')),
+        const SnackBar(content: Text('좋아요 상태 변경 실패')),
       );
     }
   }
 
+
+  // 사용자 이름과 프로필 사진 경로 설정
+  Map<String, String> _getUserDetails() {
+    if (widget.index == 2) {
+      return {
+        'userName': dataController.myProfile.value.userName ?? '',
+        'thumbnailPth': dataController.myProfile.value.thumbnailPth ?? '',
+      };
+    } else if (widget.index == 3) {
+      return {
+        'userName': post.value.userNm ?? '',
+        'thumbnailPth': post.value.thumbnailPth ?? '',
+      };
+    }
+    return {'userName': '', 'thumbnailPth': ''};
+  }
+
+
   Widget _header() {
+    final userDetails = _getUserDetails();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Row(
@@ -78,15 +95,45 @@ class _MyPostWidgetState extends State<MyPostWidget> {
         children: [
           AvatarWidget(
             type: AvatarType.type3,
-            nickname: dataController.myProfile.value.userName, // 닉네임
+            nickname: userDetails['userName'] ?? '',
             size: 40,
-            thumbPath: '${ApiService.serverUrl}/${dataController.myProfile.value.thumbnailPth}',
+            thumbPath: userDetails['thumbnailPth'] ?? '',
           ),
+          if (widget.index == 1)
+            Expanded(
+              child: Obx(() => Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          await dataController.saveFollow(context, post.value);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 15,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            post.value.followYn == 'Y' ? '언팔로우' : '팔로우',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
           GestureDetector(
             onTap: () {
               showModalBottomSheet(
                 context: Get.context!,
-                isScrollControlled: true, // 모달 시트가 화면의 대부분을 차지하도록 설정
+                isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
@@ -95,23 +142,22 @@ class _MyPostWidgetState extends State<MyPostWidget> {
                 ),
                 builder: (BuildContext context) {
                   return DraggableScrollableSheet(
-                    initialChildSize: 0.7, // 초기 높이를 화면의 70%로 설정
-                    minChildSize: 0.5,     // 최소 높이
-                    maxChildSize: 1.0,     // 최대 높이 (전체 화면)
-                    expand: false,         // 콘텐츠에 맞게 높이 조정 가능
+                    initialChildSize: 0.7,
+                    minChildSize: 0.5,
+                    maxChildSize: 1.0,
+                    expand: false,
                     builder: (_, scrollController) {
                       return SingleChildScrollView(
                         controller: scrollController,
                         child: MyPostModify(
-                          post: widget.post, // 게시물 번호 전달
-                          index: widget.index, // 게시물 인덱스 전달
+                          post: post.value,
+                          index: widget.index,
                         ),
                       );
                     },
                   );
                 },
               );
-
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -125,6 +171,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
       ),
     );
   }
+
 
   //이미지
   Widget _image() {
@@ -178,7 +225,6 @@ class _MyPostWidgetState extends State<MyPostWidget> {
     }
   }
 
-  //좋아요
   Widget _infoCount() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -189,22 +235,18 @@ class _MyPostWidgetState extends State<MyPostWidget> {
             children: [
               GestureDetector(
                 onTap: () {
-                  savePostLike(context);
+                  toggleLike(context);
                 },
-                child: widget.post.likeYn == "Y" ? 
-                  ImageData(
-                    IconPath.likeOnIcon,
-                    width: 65,
-                  ) :
-                  ImageData(
-                    IconPath.likeOffIcon,
-                    width: 65,
-                  ),
-              )
-              ,
-              const SizedBox(width: 15,),
+                child: Obx(() => ImageData(
+                      post.value.likeYn == 'Y'
+                          ? IconPath.likeOnIcon
+                          : IconPath.likeOffIcon,
+                      width: 65,
+                    )),
+              ),
+              const SizedBox(width: 15),
               GestureDetector(
-                onTap : (){
+                onTap: () {
                   showModalBottomSheet(
                     context: Get.context!,
                     shape: const RoundedRectangleBorder(
@@ -215,8 +257,8 @@ class _MyPostWidgetState extends State<MyPostWidget> {
                     ),
                     builder: (BuildContext context) {
                       return CommentWidget(
-                        post: widget.post, // 게시물 번호 전달
-                        comments: widget.post.comments, // 댓글 리스트 전달
+                        post: post.value,
+                        comments: post.value.comments,
                       );
                     },
                   );
@@ -226,7 +268,7 @@ class _MyPostWidgetState extends State<MyPostWidget> {
                   width: 60,
                 ),
               ),
-              const SizedBox(width: 15,),
+              const SizedBox(width: 15),
               ImageData(
                 IconPath.directMessage,
                 width: 55,
@@ -242,28 +284,28 @@ class _MyPostWidgetState extends State<MyPostWidget> {
     );
   }
 
-  //설명
+  
   Widget _infoDescription() {
+    final userDetails = _getUserDetails();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            // '좋아요 5개',
-            '좋아요 ${widget.post.likeCnt}개',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Obx(() => Text(
+                '좋아요 ${post.value.likeCnt}개',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              )),
           ExpandableText(
-            widget.post.content ?? '',
-            prefixText: dataController.myProfile.value.userName,
+            post.value.content ?? '',
+            prefixText: userDetails['userName'],
             onPrefixTap: () => print('prefix tapped'),
             prefixStyle: const TextStyle(fontWeight: FontWeight.bold),
             expandText: '더보기',
             collapseText: '접기',
-            maxLines: 3, //펼쳐지기 전에 보여줄 줄 수
-            expandOnTextTap: true, //더보기를 눌러야 펼쳐지는지 여부
-            collapseOnTextTap: true, //접기를 눌러야 접히는지 여부
+            maxLines: 3,
+            expandOnTextTap: true,
+            collapseOnTextTap: true,
             linkColor: Colors.grey,
           ),
         ],
@@ -321,16 +363,14 @@ class _MyPostWidgetState extends State<MyPostWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _header(),
-          const SizedBox(height: 15,),
+          const SizedBox(height: 15),
           _image(),
-          const SizedBox(height: 15,),
+          const SizedBox(height: 15),
           _infoCount(),
-          const SizedBox(height: 5,),
+          const SizedBox(height: 5),
           _infoDescription(),
-          const SizedBox(height: 5,),
-          widget.post.comments.isNotEmpty ? 
-            _replyTextBtn() :
-            const SizedBox(),
+          const SizedBox(height: 5),
+          post.value.comments.isNotEmpty ? _replyTextBtn() : const SizedBox(),
           _dateAgo(),
         ],
       ),

@@ -1,8 +1,16 @@
+import 'package:flutter_clone_instagram/src/controller/api_service.dart';
+
 class PostDto {
   // 회사 코드
   final String bizCd;
   // 사용자 ID
   final String userId;
+  // 사용자 이름
+  final String userNm;
+  // 사용자 썸네일 이름
+  final String thumbnailName;
+  // 사용자 썸네일 경로 
+  final String thumbnailPth;
   // 게시물 ID
   final String postNo;
   // 게시물 내용
@@ -17,6 +25,8 @@ class PostDto {
   late String commentDisplayYn;
   // 고정표시 여부
   late String fixDisplayYn;
+  // 팔로우 여부
+  late String followYn;
   // 좋아요 갯수
   late int likeCnt;
   // 좋아요 여부
@@ -30,6 +40,9 @@ class PostDto {
   PostDto({
     required this.bizCd,
     required this.userId,
+    this.userNm = '',
+    this.thumbnailName = '',
+    this.thumbnailPth = '',
     required this.postNo,
     required this.content,
     required this.postYmd,
@@ -37,6 +50,7 @@ class PostDto {
     this.likeDisplayYn = 'Y',
     this.commentDisplayYn = 'Y',
     this.fixDisplayYn = 'N',
+    this.followYn = 'N',
     required this.list,
     this.likeCnt = 0,
     this.likeYn = 'N',
@@ -54,6 +68,9 @@ class PostDto {
     return PostDto(
       bizCd: json['bizCd'] ?? '',
       userId: json['userId'] ?? '',
+      userNm: json['userNm'] ?? '',
+      thumbnailName: json['thumbnailName'] ?? '',
+      thumbnailPth: json['thumbnailPth'] ?? '',
       postNo: json['postNo'] ?? '',
       content: json['content'] ?? '',
       postYmd: json['postYmd'] ?? '',
@@ -61,10 +78,11 @@ class PostDto {
       likeDisplayYn: json['likeDisplayYn'] ?? 'Y',
       commentDisplayYn: json['commentDisplayYn'] ?? 'Y',
       fixDisplayYn: json['fixDisplayYn'] ?? 'N',
+      followYn: json['followYn'] ?? 'N',
       list: PostImg.fromJsonList(json['list'] ?? <PostImg>[]),
       likeCnt: json['likeCnt'] ?? 0,
       likeYn: json['likeYn'] ?? 'N',
-      comments: Comment.fromJsonList(json['comments'] ?? <Comment>[]),
+      comments: json['comments'] != null ? Comment.fromJsonList(json['comments']) : <Comment>[],
     );
   }
 
@@ -73,6 +91,9 @@ class PostDto {
     return {
       'bizCd': bizCd,
       'userId': userId,
+      'userNm': userNm,
+      'thumbnailName': thumbnailName,
+      'thumbnailPth': thumbnailPth,
       'postNo': postNo,
       'content': content,
       'postYmd': postYmd,
@@ -80,13 +101,14 @@ class PostDto {
       'likeDisplayYn': likeDisplayYn,
       'commentDisplayYn': commentDisplayYn,
       'fixDisplayYn': fixDisplayYn,
+      'followYn': followYn,
       'list': list,
     };
   }
 
   @override
   String toString() {
-    return 'MyPost(bizCd: $bizCd, userId: $userId, postNo: $postNo, content: $content, postYmd: $postYmd, displayYn: $displayYn, likeDisplayYn: $likeDisplayYn, commentDisplayYn: $commentDisplayYn, fixDisplayYn: $fixDisplayYn, list: $list)';
+    return 'MyPost(bizCd: $bizCd, userId: $userId, userNm: $userNm, thumbnailName: $thumbnailName, thumbnailPth: $thumbnailPth, postNo: $postNo, content: $content, postYmd: $postYmd, displayYn: $displayYn, likeDisplayYn: $likeDisplayYn, commentDisplayYn: $commentDisplayYn, fixDisplayYn: $fixDisplayYn, followYn: $followYn, list: $list)';
   }
 }
 
@@ -218,7 +240,7 @@ class PostImg {
       bizCd: json['bizCd'] ?? '',
       postId: json['postId'] ?? '',
       postDetailSeq: json['postDetailSeq'] ?? 0,
-      imgPth: json['imgPth'],
+      imgPth: json['imgPth'] ?? '',
       imgName: json['imgName'] ?? '',
     );
   }

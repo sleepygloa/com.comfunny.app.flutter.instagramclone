@@ -23,9 +23,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     loginController.checkLoginStatus();
-
-    //포스트 리스트 가져오기
-    dataController.getPostList(context);
   }
 
   @override
@@ -82,13 +79,15 @@ class _HomeState extends State<Home> {
           _myStory(),
           const SizedBox(width: 5,),
           //친구 스토리 리스트
-          ...List.generate(
-          100,
-          (index) => AvatarWidget(
-            type: AvatarType.type1,
-            thumbPath: 'https://storage.blip.kr/collection/6628fb909a38cca29077a6a2e336a59c.jpg',
-          ),
-        ),
+            Obx(() => Row(
+            children: List.generate(
+              dataController.followUserList.length,
+              (index) => AvatarWidget(
+              type: AvatarType.type1,
+              thumbPath: dataController.followUserList[index].thumbnailPth,
+              ),
+            ),
+            )),
         ]
       ),
     );
@@ -97,7 +96,7 @@ class _HomeState extends State<Home> {
   //포스트 리스트
   Widget _postList(){
     return Obx(()=>Column(
-      children: List.generate(dataController.postList.length, (index) => MyPostWidget(post: dataController.postList[index], index: 1)).toList(),
+      children: List.generate(dataController.postList.length, (index) => MyPostWidget(post: dataController.postList[index], index: 3)).toList(),
     ));
   }
 

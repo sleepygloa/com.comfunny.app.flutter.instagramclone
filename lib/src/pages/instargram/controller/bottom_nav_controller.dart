@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/components/message_popup.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
-import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/upload.dart';
 import 'package:get/get.dart';
 
@@ -25,12 +24,19 @@ class BottomNavController extends GetxController{
   void changeBottomNav(int value, {bool hasGesture = true}){
     var page = PageName.values[value];
     dataController.getBasicData(Get.context!);
+    print('page: $page');
     switch(page){
       case PageName.upload:
         Get.to(()=> Upload());
         break;
-      case PageName.home:
       case PageName.search:
+        _changePage(value, hasGesture: hasGesture);
+        break;
+      case PageName.home:
+        //포스트 리스트 가져오기
+        dataController.getPostList(Get.context!);
+        _changePage(value, hasGesture: hasGesture);
+        break;
       case PageName.active:
       case PageName.mypage:
         _changePage(value, hasGesture: hasGesture);

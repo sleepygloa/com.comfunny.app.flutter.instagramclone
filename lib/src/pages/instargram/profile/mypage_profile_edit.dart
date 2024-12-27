@@ -67,7 +67,6 @@ class _MypageProfileEditState extends State<MypageProfileEdit> with TickerProvid
   }
   //프로필 이미지
   Widget _getProfileImage([double? radius]) {
-    print('dataController.myProfile.value.thumbnailPth ${dataController.myProfile.value.thumbnailPth}');
     return (
         dataController.myProfile.value.thumbnailPth != ''?
         AvatarWidget(

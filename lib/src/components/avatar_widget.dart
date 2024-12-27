@@ -49,10 +49,21 @@ class AvatarWidget extends StatelessWidget{
           child: SizedBox(
             width: size,
             height: size,
-            child: CachedNetworkImage(
-              imageUrl: thumbPath,
-              fit: BoxFit.cover,
-            )
+            child: 
+              thumbPath == '' ? 
+                ImageData(IconPath.defaultImage) 
+                : 
+                (thumbPath.startsWith('http') ? 
+                  CachedNetworkImage(
+                    imageUrl: thumbPath,
+                    fit: BoxFit.cover,
+                  ) 
+                  : 
+                  CachedNetworkImage(
+                    imageUrl: '${ApiService.serverUrl}/$thumbPath',
+                    fit: BoxFit.cover,
+                  ) 
+                )
           )
         ),
       );
@@ -89,10 +100,17 @@ class AvatarWidget extends StatelessWidget{
             child: (thumbPath == '' ? 
               ImageData(IconPath.defaultImage) 
               : 
-              CachedNetworkImage(
-                imageUrl: '${ApiService.serverUrl}/$thumbPath',
-                fit: BoxFit.cover,
-              ) 
+              (thumbPath.startsWith('http') ? 
+                CachedNetworkImage(
+                  imageUrl: thumbPath,
+                  fit: BoxFit.cover,
+                ) 
+                : 
+                CachedNetworkImage(
+                  imageUrl: '${ApiService.serverUrl}/$thumbPath',
+                  fit: BoxFit.cover,
+                ) 
+              )
             ),
           )
         ),

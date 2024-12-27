@@ -2,7 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/component/image_util.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/bottom_nav_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/controller/inatargram_data_controller.dart';
 import 'package:flutter_clone_instagram/src/pages/instargram/controller/upload_controller.dart';
+import 'package:flutter_clone_instagram/src/pages/instargram/home.dart';
 import 'package:get/get.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter_clone_instagram/src/controller/api_service.dart';
@@ -19,6 +22,7 @@ class UploadDetailPost extends StatefulWidget {
 }
 
 class _UploadDetailPostState extends State<UploadDetailPost> {
+  InstargramDataController dataController = Get.find<InstargramDataController>();
   final UploadController controller = Get.put(UploadController());
   // List<AssetEntity>? get selectedImages => widget.selectedImages; // 여러 이미지를 참조
   final TextEditingController _contentController = TextEditingController();
@@ -140,6 +144,7 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
 
   // 게시물 저장
   Future<void> _savePost() async {
+    dataController.isLoading.value = true; // 로딩 시작
 
     // 최대 크기 (예: 10MB = 10 * 1024 * 1024 bytes)
     const int maxSizeInBytes = 10 * 1024 * 1024;
@@ -175,10 +180,6 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
       print('게시물 저장 실패');
       return;
     }
-    print('게시물 저장 성공: $result');
-    print('게시물 저장 성공: ${result['list']}');
-    print('게시물 저장 성공: ${result['imgPth']}');
-    print('게시물 저장 성공: ${result['imgName']}');
     final content = _contentController.text;
     // API 요청
     var result2 = await ApiService.sendApi(context, '/api/instargram/post/saveMetadata', {
@@ -195,6 +196,13 @@ class _UploadDetailPostState extends State<UploadDetailPost> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('게시물 저장 성공')),
     );
+
+
+
+    //Upload.dart 누르기 전 탭으로 이동
+    dataController.isLoading.value = false; // 로딩 시작
+    // Get.offAll(Home());
+    BottomNavController.to.changeBottomNav(0);
   }
 
   //이미지 압축
